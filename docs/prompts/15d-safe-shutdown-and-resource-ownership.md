@@ -41,6 +41,10 @@ The legacy core can abort a program with `M5`, close communications, and preserv
 
 Create `docs/checkpoints/15d-safe-shutdown-and-resource-ownership.md` with lifecycle state table, PTY/fake-transport evidence, hardware-safety statement, and remaining risks.
 
+## Branch And Pull Request
+
+Follow the [Linux Port Branching Strategy](../linux-branching-strategy.md): work in `feature/15d-safe-shutdown`, push that branch, and open a pull request to protected `master`. Do not push directly to `master`.
+
 ## Acceptance Criteria
 
 - Shutdown, transport loss, and recovery behavior are explicit and Linux-testable.

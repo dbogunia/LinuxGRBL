@@ -38,6 +38,10 @@ Legacy image, SVG, font, and raster conversion code uses `System.Drawing` and `S
 
 Create `docs/checkpoints/15b-image-and-gdi-compatibility.md` with the GDI inventory, selected back-end, fixture evidence, compatibility differences, and completion status.
 
+## Branch And Pull Request
+
+Follow the [Linux Port Branching Strategy](../linux-branching-strategy.md): work in `feature/15b-image-gdi-compatibility`, push that branch, and open a pull request to protected `master`. Do not push directly to `master`.
+
 ## Acceptance Criteria
 
 - Each ported image path has a supported Linux implementation or an explicit user-visible support decision.
