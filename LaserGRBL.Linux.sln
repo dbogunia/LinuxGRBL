@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaserGRBL.Core", "LaserGRBL.Core/LaserGRBL.Core.csproj", "{D3D176A6-FB7A-4BAC-AF35-603C7CE09025}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaserGRBL.Platform", "LaserGRBL.Platform/LaserGRBL.Platform.csproj", "{618A4A54-F7D4-4212-BA1B-003464D93948}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaserGRBL.Avalonia", "LaserGRBL.Avalonia/LaserGRBL.Avalonia.csproj", "{36C18B09-3015-4A36-9677-6E4A89425A7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaserGRBL.Linux.Tests", "LaserGRBL.Linux.Tests/LaserGRBL.Linux.Tests.csproj", "{B1F4CD05-120B-4E4E-B918-4DEDF5C042B5}"
+EndProject
+Global
+  GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    Debug|Any CPU = Debug|Any CPU
+    Release|Any CPU = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    {D3D176A6-FB7A-4BAC-AF35-603C7CE09025}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {D3D176A6-FB7A-4BAC-AF35-603C7CE09025}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {D3D176A6-FB7A-4BAC-AF35-603C7CE09025}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {D3D176A6-FB7A-4BAC-AF35-603C7CE09025}.Release|Any CPU.Build.0 = Release|Any CPU
+    {618A4A54-F7D4-4212-BA1B-003464D93948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {618A4A54-F7D4-4212-BA1B-003464D93948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {618A4A54-F7D4-4212-BA1B-003464D93948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {618A4A54-F7D4-4212-BA1B-003464D93948}.Release|Any CPU.Build.0 = Release|Any CPU
+    {36C18B09-3015-4A36-9677-6E4A89425A7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {36C18B09-3015-4A36-9677-6E4A89425A7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {36C18B09-3015-4A36-9677-6E4A89425A7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {36C18B09-3015-4A36-9677-6E4A89425A7D}.Release|Any CPU.Build.0 = Release|Any CPU
+    {B1F4CD05-120B-4E4E-B918-4DEDF5C042B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {B1F4CD05-120B-4E4E-B918-4DEDF5C042B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {B1F4CD05-120B-4E4E-B918-4DEDF5C042B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {B1F4CD05-120B-4E4E-B918-4DEDF5C042B5}.Release|Any CPU.Build.0 = Release|Any CPU
+  EndGlobalSection
+EndGlobal
