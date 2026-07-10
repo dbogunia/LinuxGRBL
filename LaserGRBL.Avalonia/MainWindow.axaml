@@ -1,0 +1,11 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="LaserGRBL.Avalonia.MainWindow"
+        Title="LaserGRBL"
+        Width="800"
+        Height="480">
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock FontSize="24" Text="LaserGRBL Linux port" />
+    <TextBlock Text="SDK-style Avalonia skeleton. Legacy workflow migration starts in later tasks." TextWrapping="Wrap" />
+  </StackPanel>
+</Window>
