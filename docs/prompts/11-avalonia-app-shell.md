@@ -11,6 +11,7 @@ The port now has core/platform projects. The WinForms `Program.Main` and `MainFo
 - Add a main window with basic layout placeholders for connection/status/log/preview areas.
 - Wire dependency injection for core/platform services.
 - Initialize logging, settings, app paths, localization, and theme services.
+- Register execution-inhibitor and secret-store implementations and surface their unavailable states through diagnostics rather than failing startup.
 - Ensure app can start on Linux.
 
 ## Out of Scope
@@ -24,6 +25,7 @@ The port now has core/platform projects. The WinForms `Program.Main` and `MainFo
 - Keep startup failure messages visible and logged.
 - Include design-time safe view-model construction if used.
 - Keep the first screen as the actual app shell, not a marketing/landing page.
+- Preserve the legacy named color schemes and semantic colors for previews, logs, commands, links, and disabled controls; a generic light/dark theme is not sufficient.
 
 ## Tests
 Run:
@@ -34,6 +36,7 @@ Add tests where feasible for:
 - App service registration.
 - Main view-model construction.
 - Settings/path initialization.
+- Color-scheme selection and semantic-color mapping.
 
 If a headless Avalonia startup smoke test is feasible in the repo, add it; otherwise document why it is not feasible.
 

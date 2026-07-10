@@ -9,10 +9,12 @@ Users need to connect to a device, select port/baud, inspect status/logs, load a
 ## Scope
 - Implement Avalonia view-models and views for:
   - Port/baud selection.
+  - Firmware type selection for GRBL, Smoothie, Marlin, and VigoWork before connection.
   - Connect/disconnect.
   - Machine status and coordinates.
   - Command log and manual command entry.
   - File loading.
+  - Drag/drop, append, reopen-last-file, and supported G-code/raster/SVG/project file routing.
   - Run, hold, resume, reset, stop/abort.
   - Jog controls and feed/power overrides where core support exists.
 - Bind UI to extracted core/platform services.
@@ -27,6 +29,7 @@ Users need to connect to a device, select port/baud, inspect status/logs, load a
 - User-facing errors must be routed through the message service and logs.
 - Manual commands must preserve existing newline/command behavior.
 - Long-running operations must not block the UI thread.
+- Acquire `IExecutionInhibitor` only while a job is active and release it on every completion, abort, disconnect, and shutdown path; failure to inhibit sleep must be visible in diagnostics but must not block machine control.
 - View-models must be testable with fake core/platform services.
 
 ## Tests
@@ -41,6 +44,9 @@ Add tests for:
 - Manual command dispatch.
 - File load success/failure.
 - Jog command dispatch.
+- Firmware selection creates the matching protocol strategy.
+- File routing, append, and reopen-last-file state transitions.
+- Execution-inhibitor acquire/release lifecycle and unavailable fallback.
 
 ## Checkpoint Report
 Create `docs/checkpoints/12-avalonia-main-workflow.md` with summary, implemented changes, tests run, test evidence, git commit/push details, remaining risks, and completion status.

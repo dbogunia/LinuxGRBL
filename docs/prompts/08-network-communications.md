@@ -10,6 +10,7 @@ LaserGRBL supports Telnet, ESP8266 WebSocket, and emulator communication in addi
 - Move or adapt Telnet communication behind the core/platform communication boundary.
 - Move or adapt ESP8266 WebSocket communication behind the same boundary.
 - Move or adapt emulator communication for automated tests and UI workflows.
+- Publish emulator activity as UI-independent events so Task 14 can provide the legacy-equivalent diagnostic console without coupling the emulator to WinForms.
 - Preserve read/write semantics expected by `GrblCore`.
 
 ## Out of Scope
@@ -22,6 +23,7 @@ LaserGRBL supports Telnet, ESP8266 WebSocket, and emulator communication in addi
 - Blocking reads must have predictable timeout/cancellation behavior.
 - Emulator must be usable in automated tests without external services.
 - Logging hooks must preserve transmitted/received command visibility without hard-coding UI concerns.
+- Emulator activity must retain bounded history outside of the UI thread.
 
 ## Tests
 Run:
@@ -33,6 +35,7 @@ Add tests for:
 - Loopback TCP/Telnet communication.
 - WebSocket message parsing or an in-process WebSocket fake.
 - Timeout/cancellation behavior.
+- Emulator activity event ordering and bounded-buffer behavior.
 
 ## Checkpoint Report
 Create `docs/checkpoints/08-network-communications.md` with summary, implemented changes, tests run, test evidence, git commit/push details, remaining risks, and completion status.

@@ -1,19 +1,21 @@
-# Task 16: End-To-End Linux Validation
+# Task 16: End-To-End Linux MVP Validation
 
 ## Goal
-Validate the Linux port end to end and produce a final readiness report.
+Validate the Linux port MVP end to end and produce a readiness report for the core Linux user workflow.
 
 ## Context
-Previous tasks should have created the SDK-style projects, extracted core/platform logic, implemented Avalonia UI, ported external tools, and added packaging. This task verifies the complete Linux user workflow.
+Previous tasks should have created the SDK-style projects, extracted core/platform logic, implemented Avalonia UI, ported external tools, implemented required 3D/OpenGL preview behavior from Task 13B, added packaging, and completed Tasks 15A-15D for CI/support, image compatibility, package device access, and safe session lifecycle. This task verifies the core Linux user workflow before the parity-completion tasks. Localization, user data compatibility, diagnostics, safety/legal behavior, privacy policy, and final feature parity are completed in Tasks 17-22.
 
 ## Scope
 - Run full build and test validation.
 - Validate app startup.
 - Validate emulator workflow.
-- Validate file loading, preview, run controls, pause/resume/reset, manual command, and logs.
+- Validate file loading, 2D/3D preview paths, run controls, pause/resume/reset, manual command, and logs.
 - Validate serial device discovery and document real-device testing if hardware is available.
 - Validate assets/resources, settings persistence, sound fallback, updater behavior, firmware flash dry-run, WiFi service behavior, and package artifact.
-- Produce a final Linux port readiness report.
+- Validate the supported-environment claim, package-specific serial permission path, image conversion fixtures, shutdown/recovery lifecycle, and single-device ownership.
+- Produce an MVP Linux port readiness report.
+- List remaining parity-completion work that must be handled by Tasks 17-22.
 
 ## Out of Scope
 - Do not start major feature rewrites.
@@ -23,7 +25,7 @@ Previous tasks should have created the SDK-style projects, extracted core/platfo
 ## Implementation Requirements
 - Create `docs/linux-port-readiness.md`.
 - Include exact commands, environment details, package artifact path, and pass/fail table.
-- Any remaining blocker must include severity, impacted workflow, and recommended next task.
+- Any remaining blocker must include severity, impacted workflow, and recommended next task, including references to Tasks 17-22 where applicable.
 - Use the emulator for automated workflow validation where real hardware is unavailable.
 
 ## Tests
@@ -33,12 +35,18 @@ Run:
 - Avalonia app startup command for the ported app.
 - Package build command from Task 15.
 - Emulator workflow validation.
+- 3D/OpenGL preview startup and nonblank render validation from Task 13B.
+- CI/support-matrix and package metadata validation from Tasks 15A and 15C.
+- Image conversion fixture suite from Task 15B.
+- Lifecycle and resource-ownership tests from Task 15D.
 
 Manual or gated checks:
 - Real USB GRBL connection if hardware is available.
 - Serial permission behavior for unavailable/permission-denied devices.
 - WiFi discovery/configuration if NetworkManager and hardware are available.
 - Firmware flash dry-run; real flash only with explicit authorization.
+- 3D preview rotate, pan, zoom, auto-fit/reset, progress, machine/cursor position, and OpenGL failure fallback.
+- Clean-install package smoke test and PTY serial test if the selected package/CI environment supports them.
 
 ## Checkpoint Report
 Create `docs/checkpoints/16-end-to-end-linux-validation.md` with summary, implemented changes, tests run, test evidence, git commit/push details, remaining risks, and completion status.
@@ -52,7 +60,10 @@ After validation and the checkpoint are complete:
 - Record commit hash and push result in the checkpoint.
 
 ## Acceptance Criteria
-- `docs/linux-port-readiness.md` exists and reports final validation.
+- `docs/linux-port-readiness.md` exists and reports MVP validation.
+- The readiness report clearly separates MVP validation from final parity validation in Task 22.
+- Required 3D/OpenGL preview validation is included; missing 3D behavior is recorded as a release blocker rather than generic future work.
+- Missing CI support evidence, supported image backend, package device-access validation, or safe shutdown/resource-ownership evidence is recorded as a release blocker.
 - All required automated tests pass or have concrete documented blockers.
 - Manual/hardware-dependent checks are either completed or explicitly marked unavailable.
 - The checkpoint exists, and the commit has been pushed.

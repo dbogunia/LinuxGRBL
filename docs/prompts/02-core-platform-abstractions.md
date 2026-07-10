@@ -18,6 +18,9 @@ Add abstractions and DTOs in the new Linux-port projects:
 - `IUpdateService`
 - `IFirmwareFlashService`
 - `IWifiService`
+- `IMonotonicClock`
+- `IExecutionInhibitor`
+- `ISecretStore`
 - `PortInfo`
 - Result types needed for process execution, tool discovery, and user-facing failures.
 
@@ -31,6 +34,9 @@ Add abstractions and DTOs in the new Linux-port projects:
 - Put OS-facing contracts and implementations in `LaserGRBL.Platform` when they are not pure domain contracts.
 - APIs must be async-capable where operations can block: process execution, dialogs, firmware flashing, WiFi operations, updates.
 - Result types must carry success/failure, user-readable message, and optional exception/detail text.
+- `IMonotonicClock` must expose elapsed monotonic time suitable for streaming watchdogs and duration accounting; production code must not depend on Windows timer-resolution APIs.
+- `IExecutionInhibitor` must acquire and release a best-effort system-sleep inhibitor for an active machine job, returning a nonfatal diagnostic when unavailable.
+- `ISecretStore` must never expose persisted secret material through normal settings serialization and must distinguish unavailable storage from a missing secret.
 - Add XML comments only where they clarify contract semantics.
 
 ## Tests
@@ -39,6 +45,7 @@ Run:
 - `DOTNET_CLI_HOME=/tmp/dotnet-home dotnet test LaserGRBL.Linux.sln`
 
 Add tests covering DTO equality/construction and simple fake implementations where useful.
+- Add fake-clock, fake-inhibitor, and unavailable-secret-store tests.
 
 ## Checkpoint Report
 Create `docs/checkpoints/02-core-platform-abstractions.md` with summary, implemented changes, tests run, test evidence, git commit/push details, remaining risks, and completion status.

@@ -12,6 +12,7 @@ The legacy `Settings` class stores arbitrary objects in `LaserGRBL.Settings.bin`
 - Add schema version metadata.
 - Add best-effort migration from readable legacy `.bin` files.
 - Preserve known settings keys needed by extracted core and upcoming Avalonia UI.
+- Preserve the firmware selection, communication/streaming modes, recent-file state, and named ColorScheme selection used by the legacy app.
 
 ## Out of Scope
 - Do not port the full settings UI.
@@ -24,6 +25,7 @@ The legacy `Settings` class stores arbitrary objects in `LaserGRBL.Settings.bin`
 - Legacy import must be isolated, optional, and failure-tolerant.
 - Avoid storing runtime-only objects directly; define typed settings models or typed key access.
 - Include documented default values for critical settings.
+- Never import or serialize legacy DPAPI-protected credentials as ordinary JSON settings; Task 18 defines their migration result and Task 21 owns new secret persistence policy.
 
 ## Tests
 Run:
@@ -37,6 +39,7 @@ Add tests for:
 - Corrupt JSON fallback.
 - Legacy import success for a simple supported sample if practical.
 - Legacy import failure does not crash.
+- Firmware, protocol, recent-file, and color-scheme settings round trip.
 
 ## Checkpoint Report
 Create `docs/checkpoints/05-settings-json-migration.md` with summary, implemented changes, tests run, test evidence, git commit/push details, remaining risks, and completion status.
