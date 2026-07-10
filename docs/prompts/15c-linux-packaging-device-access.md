@@ -39,6 +39,10 @@ Serial access is not portable merely because `/dev/ttyUSB*` can be enumerated. u
 
 Create `docs/checkpoints/15c-linux-packaging-device-access.md` with selected formats, permission model, clean-install evidence, and remaining release blockers.
 
+## Branch And Pull Request
+
+Follow the [Linux Port Branching Strategy](../linux-branching-strategy.md): work in `feature/15c-package-device-access`, push that branch, and open a pull request to protected `master`. Do not push directly to `master`.
+
 ## Acceptance Criteria
 
 - Every supported package format has an explicit, tested device-access model.

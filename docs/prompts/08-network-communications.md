@@ -41,6 +41,8 @@ Add tests for:
 Create `docs/checkpoints/08-network-communications.md` with summary, implemented changes, tests run, test evidence, git commit/push details, remaining risks, and completion status.
 
 ## Commit And Push
+Follow the [Linux Port Branching Strategy](../linux-branching-strategy.md): work in `feature/08-network-communications`, open a pull request to protected `master`, and do not push directly to `master`.
+
 After tests pass and the checkpoint is written:
 - Run `git status --short`.
 - Stage only files changed for this task.

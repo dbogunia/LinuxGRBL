@@ -52,6 +52,8 @@ Manual or gated checks:
 Create `docs/checkpoints/16-end-to-end-linux-validation.md` with summary, implemented changes, tests run, test evidence, git commit/push details, remaining risks, and completion status.
 
 ## Commit And Push
+Follow the [Linux Port Branching Strategy](../linux-branching-strategy.md): work in `feature/16-mvp-validation`; do not push directly to `master`. After Task 16, create a `release/linux-v<version>` branch only for release-blocking fixes, validation, packaging, and documentation.
+
 After validation and the checkpoint are complete:
 - Run `git status --short`.
 - Stage only files changed for this task.

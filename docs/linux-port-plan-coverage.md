@@ -2,6 +2,8 @@
 
 This document is the required coverage checklist for the Linux port prompts. Task 00 must refresh it from local repository inspection, and Task 22 must use it as the final parity checklist.
 
+All implementation tasks follow the [Linux Port Branching Strategy](linux-branching-strategy.md): short-lived task branches, pull requests to protected `master`, required CI, and release branches only after MVP validation.
+
 ## Coverage Status Values
 
 - `covered`: explicitly handled by one or more prompts.

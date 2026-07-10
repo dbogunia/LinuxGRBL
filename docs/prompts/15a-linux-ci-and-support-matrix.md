@@ -39,6 +39,10 @@ The port will replace a .NET Framework WinForms application with a .NET 8 Avalon
 
 Create `docs/checkpoints/15a-linux-ci-and-support-matrix.md` with the support matrix, CI evidence, unavailable environment checks, remaining risks, and completion status.
 
+## Branch And Pull Request
+
+Follow the [Linux Port Branching Strategy](../linux-branching-strategy.md): work in `feature/15a-ci-support-matrix`, push that branch, and open a pull request to protected `master`. Do not push directly to `master`.
+
 ## Acceptance Criteria
 
 - A support matrix and reproducible Linux CI workflow exist.
