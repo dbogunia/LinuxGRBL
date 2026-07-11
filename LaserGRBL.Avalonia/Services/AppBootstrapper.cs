@@ -1,0 +1,113 @@
+using LaserGRBL.Avalonia.ViewModels;
+using LaserGRBL.Core.Abstractions;
+using LaserGRBL.Platform.Contracts;
+using LaserGRBL.Platform.Implementations;
+
+namespace LaserGRBL.Avalonia.Services;
+
+public static class AppBootstrapper
+{
+    public static AppServices CreateDefaultServices(Func<string, string?>? environment = null, string? homeDirectory = null, string? tempDirectory = null)
+    {
+        var diagnostics = new StartupDiagnostics();
+        var paths = new LinuxAppPaths("LaserGRBL", environment, homeDirectory, tempDirectory);
+        EnsureDirectories(paths, diagnostics);
+
+        IProcessRunner processes = new ProcessRunner();
+        var logger = new AppLogSink(paths);
+        logger.Info("Avalonia app shell bootstrap started.");
+        var localization = LocalizationCatalog.Default;
+        var settings = new JsonSettingsStore(paths);
+        var themeCatalog = ColorSchemeCatalog.Default;
+        var theme = themeCatalog.Get("Default");
+
+        IExecutionInhibitor inhibitor = new UnavailableExecutionInhibitor();
+        ISecretStore secretStore = new UnavailableSecretStore();
+        diagnostics.Add("Sleep inhibition is unavailable in this shell build; active-job integration starts in later tasks.");
+        diagnostics.Add("Secure secret storage is unavailable in this shell build; credentials must be re-entered when feature UI arrives.");
+
+        var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics);
+        return new AppServices(paths, settings, processes, new LinuxSerialPortService(), new LinuxWifiService(processes), inhibitor, secretStore, themeCatalog, localization, logger, diagnostics, viewModel);
+    }
+
+    private static void EnsureDirectories(IAppPaths paths, StartupDiagnostics diagnostics)
+    {
+        foreach (var directory in new[] { paths.ConfigDirectory, paths.DataDirectory, paths.CacheDirectory, paths.LogDirectory })
+        {
+            try { Directory.CreateDirectory(directory); }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                diagnostics.Add($"Unable to initialize directory '{directory}': {exception.Message}");
+            }
+        }
+    }
+}
+
+public sealed record AppServices(
+    IAppPaths Paths,
+    JsonSettingsStore Settings,
+    IProcessRunner Processes,
+    ISerialPortService SerialPorts,
+    IWifiService Wifi,
+    IExecutionInhibitor ExecutionInhibitor,
+    ISecretStore SecretStore,
+    ColorSchemeCatalog ColorSchemes,
+    LocalizationCatalog Localization,
+    AppLogSink Log,
+    StartupDiagnostics Diagnostics,
+    MainWindowViewModel MainWindow);
+
+public sealed class StartupDiagnostics
+{
+    private readonly List<string> messages = [];
+
+    public IReadOnlyList<string> Messages => messages;
+
+    public void Add(string message)
+    {
+        if (!string.IsNullOrWhiteSpace(message)) messages.Add(message);
+    }
+}
+
+public sealed class AppLogSink(IAppPaths paths)
+{
+    public string LogFilePath => Path.Combine(paths.LogDirectory, "lasergrbl.log");
+
+    public void Info(string message) => Write("INFO", message);
+
+    public void Warning(string message) => Write("WARN", message);
+
+    private void Write(string level, string message)
+    {
+        try
+        {
+            Directory.CreateDirectory(paths.LogDirectory);
+            File.AppendAllText(LogFilePath, $"{DateTimeOffset.UtcNow:O} {level} {message}{Environment.NewLine}");
+        }
+        catch (IOException)
+        {
+            // Startup must remain non-fatal even when logging cannot be initialized.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Startup must remain non-fatal even when logging cannot be initialized.
+        }
+    }
+}
+
+public sealed class LocalizationCatalog
+{
+    private readonly Dictionary<string, string> strings;
+
+    public LocalizationCatalog(IReadOnlyDictionary<string, string> strings) => this.strings = new Dictionary<string, string>(strings, StringComparer.Ordinal);
+
+    public static LocalizationCatalog Default { get; } = new(new Dictionary<string, string>
+    {
+        ["App.Title"] = "LaserGRBL",
+        ["Status.Disconnected"] = "Disconnected",
+        ["Firmware.NotSelected"] = "Firmware: not selected",
+        ["Shell.WorkflowDeferred"] = "Main workflow, dialogs, and preview renderer are implemented in later tasks."
+    });
+
+    public string Get(string key) => strings.TryGetValue(key, out var value) ? value : key;
+}
