@@ -26,7 +26,7 @@ Implemented Linux WiFi discovery and explicit NetworkManager configuration suppo
 
 ## Commit And Push
 
-Commit: `f9fef18` (`Task 10: Linux WiFi services`)
+Implementation commit: `fb3e2ec` (`Task 10: Linux WiFi services`)
 
 Push: pending
 
