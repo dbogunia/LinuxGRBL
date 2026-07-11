@@ -28,8 +28,8 @@ Implemented Linux WiFi discovery and explicit NetworkManager configuration suppo
 
 Implementation commit: `fb3e2ec` (`Task 10: Linux WiFi services`)
 
-Push: pending
+Push: `feature/10-wifi-services` pushed to `origin`.
 
 ## Completion Status
 
-Complete for Task 10 implementation once push is recorded.
+Complete for Task 10 implementation.
