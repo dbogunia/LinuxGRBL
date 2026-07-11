@@ -33,7 +33,7 @@ A GUI startup smoke test was not added in this task because the current CI/sandb
 
 ## Commit And Push
 
-Commit: pending
+Implementation commit: `43d5c7e` (`Task 11: Avalonia app shell`)
 
 Push: pending
 
