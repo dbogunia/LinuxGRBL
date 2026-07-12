@@ -29,9 +29,13 @@ public static class AppBootstrapper
 
         var serialPorts = new LinuxSerialPortService();
         var messageService = new LoggingMessageService(logger);
+        var wifi = new LinuxWifiService(processes);
+        var fileDialogs = new UnavailableFileDialogService();
+        var firmwareFlash = new LinuxFirmwareFlashService(processes);
         var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme), new Preview3DSceneBuilder(), new AvaloniaOpenGlPreviewContextFactory());
-        var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics, workflow);
-        return new AppServices(paths, settings, processes, serialPorts, new LinuxWifiService(processes), inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow);
+        var tools = new DialogToolsViewModel(settings, fileDialogs, messageService, wifi, firmwareFlash);
+        var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics, workflow, tools);
+        return new AppServices(paths, settings, processes, serialPorts, wifi, firmwareFlash, fileDialogs, inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow, tools);
     }
 
     private static void EnsureDirectories(IAppPaths paths, StartupDiagnostics diagnostics)
@@ -53,6 +57,8 @@ public sealed record AppServices(
     IProcessRunner Processes,
     ISerialPortService SerialPorts,
     IWifiService Wifi,
+    IFirmwareFlashService FirmwareFlash,
+    IFileDialogService FileDialogs,
     IExecutionInhibitor ExecutionInhibitor,
     ISecretStore SecretStore,
     IMessageService Messages,
@@ -61,7 +67,8 @@ public sealed record AppServices(
     AppLogSink Log,
     StartupDiagnostics Diagnostics,
     MainWindowViewModel MainWindow,
-    MainWorkflowViewModel Workflow);
+    MainWorkflowViewModel Workflow,
+    DialogToolsViewModel Tools);
 
 public sealed class StartupDiagnostics
 {
@@ -83,6 +90,15 @@ public sealed class LoggingMessageService(AppLogSink log) : IMessageService
         else log.Info($"{request.Title}: {request.Message}");
         return Task.FromResult(request.Severity != MessageSeverity.Confirmation);
     }
+}
+
+public sealed class UnavailableFileDialogService : IFileDialogService
+{
+    public Task<OperationResult<IReadOnlyList<string>>> OpenAsync(FileDialogRequest request, CancellationToken cancellationToken = default) =>
+        Task.FromResult(OperationResult<IReadOnlyList<string>>.Failure("Native file dialogs are not wired in this shell build.", request.Title));
+
+    public Task<OperationResult<string>> SaveAsync(FileDialogRequest request, CancellationToken cancellationToken = default) =>
+        Task.FromResult(OperationResult<string>.Failure("Native file dialogs are not wired in this shell build.", request.Title));
 }
 
 public sealed class AppLogSink(IAppPaths paths)
