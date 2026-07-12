@@ -82,6 +82,8 @@ Release readiness is blocked by:
 - no clean-install package smoke with serial hardware
 - Tasks 17-22 still pending for localization, user data compatibility, diagnostics, safety/legal, privacy/update policy, and final feature parity
 
+Added later-check guidance in `docs/linux-port-readiness.md` for USB GRBL hardware validation: identify `/dev/serial/by-id` or `ttyUSB`/`ttyACM`, fix `dialout` permission if needed, verify connect/handshake/manual command/hold/resume/reset/disconnect, and record device/firmware/pass-fail evidence.
+
 ## Git Commit And Push
 
 Implementation branch: `feature/16-mvp-validation`

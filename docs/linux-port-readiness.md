@@ -108,6 +108,33 @@ Fix:
 | Medium | User data compatibility not complete | migration of existing settings/projects | Task 18 |
 | Medium | Final parity review not complete | gap closure against legacy LaserGRBL | Task 22 |
 
+## Later Hardware Checks
+
+When a USB GRBL controller is available, run and record this validation as a release-blocking hardware pass/fail:
+
+1. Plug in the controller and identify the stable device path:
+
+```bash
+ls -l /dev/serial/by-id /dev/ttyUSB* /dev/ttyACM*
+```
+
+2. Prefer `/dev/serial/by-id/*` in the app when present.
+3. If opening the port fails with permission denied, add the user to the serial group and log out/in:
+
+```bash
+sudo usermod -aG dialout "$USER"
+```
+
+4. Start the Avalonia app and verify:
+   - port list shows the controller
+   - connect opens the selected port
+   - GRBL handshake/status is visible
+   - manual command send works with a harmless query such as `?` or `$I`
+   - hold/resume/reset controls send expected realtime commands
+   - disconnect releases the port
+   - starting a second app instance cannot silently claim the same device
+5. Record the device name, firmware response, permissions result, commands tested, and pass/fail outcome in this readiness report or the release validation checkpoint.
+
 ## MVP Verdict
 
 The Linux port MVP is ready to continue into Tasks 17-22. It is not release-ready. The largest remaining release blockers are real OpenGL/GPU validation, real hardware serial validation, clean-install package validation, and final safety/legal/privacy/parity work.
