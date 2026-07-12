@@ -11,6 +11,11 @@
       "required": true
     },
     {
+      "name": "SkiaSharp.NativeAssets.Linux",
+      "purpose": "Bundled native image rendering backend used by Linux raster compatibility paths.",
+      "required": true
+    },
+    {
       "name": "pw-play | paplay | aplay",
       "purpose": "Optional sound playback backend used by LinuxSoundService.",
       "required": false
