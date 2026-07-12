@@ -17,15 +17,16 @@ public static class AppBootstrapper
         IProcessRunner processes = new ProcessRunner();
         var logger = new AppLogSink(paths);
         logger.Info("Avalonia app shell bootstrap started.");
-        var localization = LocalizationCatalog.Default;
         var settings = new JsonSettingsStore(paths);
+        var persistedSettings = settings.LoadAsync().GetAwaiter().GetResult().Value ?? LaserGRBL.Core.Settings.PortSettings.Default;
+        var localization = LocalizationCatalog.Default.ForCulture(persistedSettings.Language);
         var themeCatalog = ColorSchemeCatalog.Default;
         var theme = themeCatalog.Get("Default");
 
         IExecutionInhibitor inhibitor = new UnavailableExecutionInhibitor();
         ISecretStore secretStore = new UnavailableSecretStore();
-        diagnostics.Add("Sleep inhibition is unavailable in this shell build; active-job integration starts in later tasks.");
-        diagnostics.Add("Secure secret storage is unavailable in this shell build; credentials must be re-entered when feature UI arrives.");
+        diagnostics.Add(localization.Get("Diagnostics.SleepInhibitionUnavailable"));
+        diagnostics.Add(localization.Get("Diagnostics.SecretStoreUnavailable"));
 
         var serialPorts = new LinuxSerialPortService();
         var messageService = new LoggingMessageService(logger);
@@ -37,7 +38,7 @@ public static class AppBootstrapper
         var packageMetadata = new PackageMetadataService();
         var resourceLocks = new FileMachineResourceLockProvider(Path.Combine(paths.CacheDirectory, "locks"));
         var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme), new Preview3DSceneBuilder(), new AvaloniaOpenGlPreviewContextFactory(), resourceLocks);
-        var tools = new DialogToolsViewModel(settings, fileDialogs, messageService, wifi, firmwareFlash);
+        var tools = new DialogToolsViewModel(settings, fileDialogs, messageService, wifi, firmwareFlash, localization);
         var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics, workflow, tools);
         return new AppServices(paths, settings, processes, serialPorts, wifi, firmwareFlash, fileDialogs, sound, updates, packageMetadata, inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow, tools);
     }
@@ -132,21 +133,4 @@ public sealed class AppLogSink(IAppPaths paths)
             // Startup must remain non-fatal even when logging cannot be initialized.
         }
     }
-}
-
-public sealed class LocalizationCatalog
-{
-    private readonly Dictionary<string, string> strings;
-
-    public LocalizationCatalog(IReadOnlyDictionary<string, string> strings) => this.strings = new Dictionary<string, string>(strings, StringComparer.Ordinal);
-
-    public static LocalizationCatalog Default { get; } = new(new Dictionary<string, string>
-    {
-        ["App.Title"] = "LaserGRBL",
-        ["Status.Disconnected"] = "Disconnected",
-        ["Firmware.NotSelected"] = "Firmware: not selected",
-        ["Shell.WorkflowDeferred"] = "Main workflow, dialogs, and preview renderer are implemented in later tasks."
-    });
-
-    public string Get(string key) => strings.TryGetValue(key, out var value) ? value : key;
 }

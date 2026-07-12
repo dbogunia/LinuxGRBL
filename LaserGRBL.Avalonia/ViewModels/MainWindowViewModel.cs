@@ -13,15 +13,17 @@ public sealed class MainWindowViewModel
         Theme = theme;
         Title = localization.Get("App.Title");
         FirmwareText = localization.Get("Firmware.NotSelected");
-        Diagnostics = diagnostics.Messages.Count == 0 ? ["Application shell initialized."] : diagnostics.Messages;
+        Diagnostics = diagnostics.Messages.Count == 0 ? [localization.Get("Shell.Initialized")] : diagnostics.Messages;
         PathsSummary = $"{paths.ConfigDirectory} | {paths.DataDirectory}";
         SettingsSummary = $"Settings file: {settings.FilePath}";
         LogLines =
         [
-            "Avalonia shell started.",
-            "Core and Linux platform services registered.",
+            localization.Get("Shell.Started"),
+            localization.Get("Shell.ServicesRegistered"),
             localization.Get("Shell.WorkflowDeferred")
         ];
+        ConnectionSummary = localization.Get("Shell.ConnectionSummary");
+        DeviceAccessSummary = localization.Get("Shell.DeviceAccessSummary");
     }
 
     public static MainWindowViewModel DesignTime { get; } = new(
@@ -36,7 +38,8 @@ public sealed class MainWindowViewModel
             new UnavailableFileDialogService(),
             new DesignTimeMessageService(),
             new DesignTimeWifiService(),
-            new DesignTimeFirmwareFlashService()));
+            new DesignTimeFirmwareFlashService(),
+            LocalizationCatalog.Default));
 
     public string Title { get; }
 
@@ -50,9 +53,9 @@ public sealed class MainWindowViewModel
 
     public string FirmwareText { get; }
 
-    public string ConnectionSummary { get; } = "No machine connected";
+    public string ConnectionSummary { get; }
 
-    public string DeviceAccessSummary { get; } = "Serial, TCP, WebSocket, emulator, process, and WiFi services are registered for future workflow screens.";
+    public string DeviceAccessSummary { get; }
 
     public string PreviewSummary { get; } = "2D/3D preview arrives in Tasks 13 and 13B";
 
