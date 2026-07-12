@@ -70,7 +70,9 @@ The tarball contains:
 
 Implementation branch: `feature/15-packaging-sound`
 
-Commit and push: pending.
+Implementation commit: `7a4e07e` (`Task 15: Sound update and Linux packaging`)
+
+Push: pending.
 
 ## Completion Status
 
