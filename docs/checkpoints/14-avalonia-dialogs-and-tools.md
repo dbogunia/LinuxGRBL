@@ -53,7 +53,9 @@ Task 13B manual Linux GPU/display validation is explicitly not verified yet and 
 
 Implementation branch: `feature/14-dialogs-tools`
 
-Commit and push: pending.
+Implementation commit: `d12c080` (`Task 14: Avalonia dialogs and tools`)
+
+Push: pending.
 
 ## Completion Status
 
