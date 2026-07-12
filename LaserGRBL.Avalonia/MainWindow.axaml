@@ -63,6 +63,21 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
+
+          <TextBlock Text="Tools" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
+          <ItemsControl ItemsSource="{Binding Tools.Groups}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Margin="0,0,0,8" Padding="10" BorderBrush="{Binding $parent[Window].DataContext.Theme.Border}" BorderThickness="1" CornerRadius="6" Background="{Binding $parent[Window].DataContext.Theme.SurfaceBackground}">
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{Binding $parent[Window].DataContext.Theme.Text}" />
+                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Foreground="{Binding $parent[Window].DataContext.Theme.MutedText}" />
+                    <TextBlock Text="{Binding Status}" TextWrapping="Wrap" Foreground="{Binding $parent[Window].DataContext.Theme.Link}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </StackPanel>
       </ScrollViewer>
     </Border>
