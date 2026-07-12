@@ -44,6 +44,10 @@ Package metadata guard commands passed locally:
 - script checks for `dotnet publish` and `sha256sum`
 - workflow check for `LaserGRBL.Linux.sln`
 
+Hosted GitHub Actions:
+
+`Linux port build and test` passed on PR #20 in 45 seconds.
+
 ## Support Matrix
 
 Support matrix added at `docs/linux-support-matrix.md`.
@@ -84,7 +88,7 @@ Implementation branch: `feature/15a-ci-support-matrix`
 
 Implementation commit: `51679d5` (`Task 15A: Linux CI and support matrix`)
 
-Push: pending.
+Push: complete on `feature/15a-ci-support-matrix`.
 
 ## Completion Status
 
