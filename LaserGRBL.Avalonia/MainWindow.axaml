@@ -69,18 +69,23 @@
 
     <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="*,170">
       <Border Margin="14" BorderBrush="{Binding Theme.Border}" BorderThickness="1" CornerRadius="6" Background="{Binding Theme.PreviewBackground}">
-        <Grid RowDefinitions="36,*">
-          <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,*" Margin="10,6" ColumnSpacing="6">
-            <Button Content="Fit" Command="{Binding Workflow.PreviewAutoFitCommand}" />
+        <Grid ColumnDefinitions="*,*" RowDefinitions="36,*">
+          <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" Margin="10,6" ColumnSpacing="6">
+            <Button Content="2D Fit" Command="{Binding Workflow.PreviewAutoFitCommand}" />
             <Button Grid.Column="1" Content="-" Command="{Binding Workflow.PreviewZoomOutCommand}" />
             <Button Grid.Column="2" Content="+" Command="{Binding Workflow.PreviewZoomInCommand}" />
-            <Button Grid.Column="3" Content="Left" Command="{Binding Workflow.PreviewPanLeftCommand}" />
-            <Button Grid.Column="4" Content="Right" Command="{Binding Workflow.PreviewPanRightCommand}" />
-            <Button Grid.Column="5" Content="Up" Command="{Binding Workflow.PreviewPanUpCommand}" />
-            <Button Grid.Column="6" Content="Down" Command="{Binding Workflow.PreviewPanDownCommand}" />
-            <TextBlock Grid.Column="7" Text="{Binding Workflow.MachineCoordinates}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{Binding Theme.MutedText}" />
+            <TextBlock Grid.Column="4" Text="{Binding Workflow.MachineCoordinates}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{Binding Theme.MutedText}" />
+          </Grid>
+          <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" Margin="10,6" ColumnSpacing="6">
+            <Button Content="3D Reset" Command="{Binding Workflow.Preview3DAutoFitCommand}" />
+            <Button Grid.Column="1" Content="-" Command="{Binding Workflow.Preview3DZoomOutCommand}" />
+            <Button Grid.Column="2" Content="+" Command="{Binding Workflow.Preview3DZoomInCommand}" />
+            <Button Grid.Column="3" Content="Rot L" Command="{Binding Workflow.Preview3DRotateLeftCommand}" />
+            <Button Grid.Column="4" Content="Rot R" Command="{Binding Workflow.Preview3DRotateRightCommand}" />
+            <Button Grid.Column="5" Content="Tilt" Command="{Binding Workflow.Preview3DTiltUpCommand}" />
           </Grid>
           <preview:JobPreviewControl Grid.Row="1" Scene="{Binding Workflow.PreviewScene}" Interaction="{Binding Workflow.PreviewInteraction}" />
+          <preview:JobPreview3DControl Grid.Row="1" Grid.Column="1" Scene="{Binding Workflow.Preview3DScene}" Camera="{Binding Workflow.Preview3DCamera}" ContextStatus="{Binding Workflow.Preview3DStatus}" />
         </Grid>
       </Border>
 

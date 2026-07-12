@@ -29,7 +29,7 @@ public static class AppBootstrapper
 
         var serialPorts = new LinuxSerialPortService();
         var messageService = new LoggingMessageService(logger);
-        var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme));
+        var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme), new Preview3DSceneBuilder(), new AvaloniaOpenGlPreviewContextFactory());
         var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics, workflow);
         return new AppServices(paths, settings, processes, serialPorts, new LinuxWifiService(processes), inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow);
     }
