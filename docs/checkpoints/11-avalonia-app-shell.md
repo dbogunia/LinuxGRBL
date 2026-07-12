@@ -35,8 +35,8 @@ A GUI startup smoke test was not added in this task because the current CI/sandb
 
 Implementation commit: `43d5c7e` (`Task 11: Avalonia app shell`)
 
-Push: pending
+Push: complete on `feature/11-avalonia-shell`
 
 ## Completion Status
 
-Complete for Task 11 implementation once commit and push are recorded.
+Complete for Task 11 implementation and PR handoff.
