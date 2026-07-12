@@ -32,9 +32,9 @@ No GPU/display manual validation was performed in this headless run. The Avaloni
 
 ## Commit And Push
 
-Implementation commit: pending
+Implementation commit: `1d36e1d` (`Task 13B: Avalonia 3D OpenGL renderer`)
 
-Push: pending
+Push: complete on `feature/13b-opengl-preview`
 
 ## Completion Status
 
