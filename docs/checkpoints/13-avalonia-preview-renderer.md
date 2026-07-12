@@ -32,10 +32,10 @@ No manual GUI screenshot was captured in this headless run. The Avalonia project
 
 ## Commit And Push
 
-Implementation commit: pending
+Implementation commit: `adc1e06` (`Task 13: Avalonia preview renderer`)
 
-Push: pending
+Push: complete on `feature/13-preview-2d`
 
 ## Completion Status
 
-Complete for local Task 13 implementation once commit and push are recorded.
+Complete for Task 13 implementation and PR handoff.
