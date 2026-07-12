@@ -28,7 +28,7 @@ public sealed class LinuxSerialPortService : ISerialPortService
     {
         var connection = new SystemSerialConnection(port, options);
         try { await connection.OpenAsync(cancellationToken); return OperationResult<ISerialConnection>.Success(connection); }
-        catch (UnauthorizedAccessException exception) { await connection.DisposeAsync(); return OperationResult<ISerialConnection>.Failure("Permission denied opening serial device. Add the user to the serial group or configure udev.", port.DevicePath, exception); }
+        catch (UnauthorizedAccessException exception) { await connection.DisposeAsync(); return OperationResult<ISerialConnection>.Failure(LinuxDeviceAccessPolicy.SerialPermissionDeniedMessage(port.DevicePath), port.DevicePath, exception); }
         catch (Exception exception) when (exception is IOException or ArgumentException) { await connection.DisposeAsync(); return OperationResult<ISerialConnection>.Failure("Unable to open serial device.", port.DevicePath, exception); }
     }
 }

@@ -4,6 +4,13 @@
   "format": "tar.gz",
   "runtimeIdentifiers": [ "linux-x64" ],
   "integrityAlgorithm": "SHA256",
+  "desktopIntegration": {
+    "desktopEntry": "desktop/linuxgrbl.desktop",
+    "icon": "icons/linuxgrbl.svg",
+    "mimeInfo": "mime/application-x-lasergrbl-project.xml",
+    "installer": "install-desktop-integration.sh",
+    "installScope": "user"
+  },
   "dependencies": [
     {
       "name": "self-contained",
