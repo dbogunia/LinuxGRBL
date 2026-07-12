@@ -32,10 +32,13 @@ public static class AppBootstrapper
         var wifi = new LinuxWifiService(processes);
         var fileDialogs = new UnavailableFileDialogService();
         var firmwareFlash = new LinuxFirmwareFlashService(processes);
+        var sound = new LinuxSoundService(processes, Path.Combine(AppContext.BaseDirectory, "Sound"));
+        var updates = new ReleaseManifestUpdateService(new HttpUpdateManifestClient(), new Uri("https://github.com/dbogunia/LinuxGRBL/releases/latest/download/linuxgrbl-update.json"), new Version(0, 1, 0), enabled: false);
+        var packageMetadata = new PackageMetadataService();
         var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme), new Preview3DSceneBuilder(), new AvaloniaOpenGlPreviewContextFactory());
         var tools = new DialogToolsViewModel(settings, fileDialogs, messageService, wifi, firmwareFlash);
         var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics, workflow, tools);
-        return new AppServices(paths, settings, processes, serialPorts, wifi, firmwareFlash, fileDialogs, inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow, tools);
+        return new AppServices(paths, settings, processes, serialPorts, wifi, firmwareFlash, fileDialogs, sound, updates, packageMetadata, inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow, tools);
     }
 
     private static void EnsureDirectories(IAppPaths paths, StartupDiagnostics diagnostics)
@@ -59,6 +62,9 @@ public sealed record AppServices(
     IWifiService Wifi,
     IFirmwareFlashService FirmwareFlash,
     IFileDialogService FileDialogs,
+    ISoundService Sound,
+    IUpdateService Updates,
+    IPackageMetadataService PackageMetadata,
     IExecutionInhibitor ExecutionInhibitor,
     ISecretStore SecretStore,
     IMessageService Messages,

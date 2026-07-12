@@ -1,0 +1,39 @@
+{
+  "packageId": "linuxgrbl-avalonia",
+  "version": "0.1.0",
+  "format": "tar.gz",
+  "runtimeIdentifiers": [ "linux-x64" ],
+  "integrityAlgorithm": "SHA256",
+  "dependencies": [
+    {
+      "name": "self-contained",
+      "purpose": ".NET runtime is bundled by dotnet publish for the selected RID.",
+      "required": true
+    },
+    {
+      "name": "pw-play | paplay | aplay",
+      "purpose": "Optional sound playback backend used by LinuxSoundService.",
+      "required": false
+    },
+    {
+      "name": "avrdude",
+      "purpose": "Optional firmware flashing backend.",
+      "required": false
+    },
+    {
+      "name": "autotrace",
+      "purpose": "Optional raster/vector conversion helper where configured.",
+      "required": false
+    },
+    {
+      "name": "NetworkManager/nmcli",
+      "purpose": "Optional WiFi discovery and configuration backend.",
+      "required": false
+    }
+  ],
+  "noticeFiles": [
+    "LICENSE.md",
+    "README.md",
+    "packaging/linux/THIRD-PARTY-NOTICES.md"
+  ]
+}
