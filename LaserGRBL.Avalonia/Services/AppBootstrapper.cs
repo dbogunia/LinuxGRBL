@@ -26,8 +26,11 @@ public static class AppBootstrapper
         diagnostics.Add("Sleep inhibition is unavailable in this shell build; active-job integration starts in later tasks.");
         diagnostics.Add("Secure secret storage is unavailable in this shell build; credentials must be re-entered when feature UI arrives.");
 
-        var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics);
-        return new AppServices(paths, settings, processes, new LinuxSerialPortService(), new LinuxWifiService(processes), inhibitor, secretStore, themeCatalog, localization, logger, diagnostics, viewModel);
+        var serialPorts = new LinuxSerialPortService();
+        var messageService = new LoggingMessageService(logger);
+        var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService);
+        var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics, workflow);
+        return new AppServices(paths, settings, processes, serialPorts, new LinuxWifiService(processes), inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow);
     }
 
     private static void EnsureDirectories(IAppPaths paths, StartupDiagnostics diagnostics)
@@ -51,11 +54,13 @@ public sealed record AppServices(
     IWifiService Wifi,
     IExecutionInhibitor ExecutionInhibitor,
     ISecretStore SecretStore,
+    IMessageService Messages,
     ColorSchemeCatalog ColorSchemes,
     LocalizationCatalog Localization,
     AppLogSink Log,
     StartupDiagnostics Diagnostics,
-    MainWindowViewModel MainWindow);
+    MainWindowViewModel MainWindow,
+    MainWorkflowViewModel Workflow);
 
 public sealed class StartupDiagnostics
 {
@@ -66,6 +71,16 @@ public sealed class StartupDiagnostics
     public void Add(string message)
     {
         if (!string.IsNullOrWhiteSpace(message)) messages.Add(message);
+    }
+}
+
+public sealed class LoggingMessageService(AppLogSink log) : IMessageService
+{
+    public Task<bool> ShowAsync(MessageRequest request, CancellationToken cancellationToken = default)
+    {
+        if (request.Severity is MessageSeverity.Error) log.Warning($"{request.Title}: {request.Message}");
+        else log.Info($"{request.Title}: {request.Message}");
+        return Task.FromResult(request.Severity != MessageSeverity.Confirmation);
     }
 }
 

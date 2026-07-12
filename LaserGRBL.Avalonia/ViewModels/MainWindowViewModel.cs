@@ -6,11 +6,11 @@ namespace LaserGRBL.Avalonia.ViewModels;
 
 public sealed class MainWindowViewModel
 {
-    public MainWindowViewModel(IAppPaths paths, JsonSettingsStore settings, SemanticColorScheme theme, LocalizationCatalog localization, StartupDiagnostics diagnostics)
+    public MainWindowViewModel(IAppPaths paths, JsonSettingsStore settings, SemanticColorScheme theme, LocalizationCatalog localization, StartupDiagnostics diagnostics, MainWorkflowViewModel workflow)
     {
+        Workflow = workflow;
         Theme = theme;
         Title = localization.Get("App.Title");
-        StatusText = localization.Get("Status.Disconnected");
         FirmwareText = localization.Get("Firmware.NotSelected");
         Diagnostics = diagnostics.Messages.Count == 0 ? ["Application shell initialized."] : diagnostics.Messages;
         PathsSummary = $"{paths.ConfigDirectory} | {paths.DataDirectory}";
@@ -28,13 +28,16 @@ public sealed class MainWindowViewModel
         new JsonSettingsStore(new LinuxAppPaths("LaserGRBL", _ => null, "/home/user", "/tmp")),
         ColorSchemeCatalog.Default.Get("Default"),
         LocalizationCatalog.Default,
-        new StartupDiagnostics());
+        new StartupDiagnostics(),
+        new MainWorkflowViewModel(new InMemorySerialPortService(), new UnavailableExecutionInhibitor(), new DesignTimeMessageService()));
 
     public string Title { get; }
 
     public SemanticColorScheme Theme { get; }
 
-    public string StatusText { get; }
+    public MainWorkflowViewModel Workflow { get; }
+
+    public string StatusText => Workflow.StatusText;
 
     public string FirmwareText { get; }
 
@@ -51,4 +54,9 @@ public sealed class MainWindowViewModel
     public IReadOnlyList<string> Diagnostics { get; }
 
     public IReadOnlyList<string> LogLines { get; }
+
+    private sealed class DesignTimeMessageService : LaserGRBL.Core.Abstractions.IMessageService
+    {
+        public Task<bool> ShowAsync(LaserGRBL.Core.Abstractions.MessageRequest request, CancellationToken cancellationToken = default) => Task.FromResult(true);
+    }
 }
