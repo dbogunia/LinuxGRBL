@@ -82,7 +82,9 @@ Task 13B manual Linux GPU/display validation remains not verified and release-bl
 
 Implementation branch: `feature/15a-ci-support-matrix`
 
-Commit and push: pending.
+Implementation commit: `51679d5` (`Task 15A: Linux CI and support matrix`)
+
+Push: pending.
 
 ## Completion Status
 
