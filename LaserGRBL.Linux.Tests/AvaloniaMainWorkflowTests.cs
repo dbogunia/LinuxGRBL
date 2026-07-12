@@ -151,6 +151,28 @@ public sealed class AvaloniaMainWorkflowTests
         File.Delete(path);
     }
 
+    [Fact]
+    public async Task Connect_uses_machine_resource_lock_and_releases_it_on_disconnect()
+    {
+        var service = new FakeSerialPortService();
+        var locks = new FakeResourceLocks();
+        var messages = new FakeMessageService();
+        var workflow = new MainWorkflowViewModel(service, new FakeExecutionInhibitor(), messages, resourceLocks: locks);
+        await workflow.RefreshPortsAsync();
+
+        await workflow.ConnectAsync();
+        Assert.True(workflow.IsConnected);
+        Assert.Equal("/dev/ttyUSB0", locks.AcquiredResource);
+
+        await workflow.DisconnectAsync();
+        Assert.Equal(1, locks.Lock.DisposeCount);
+
+        locks.Fail = true;
+        await workflow.ConnectAsync();
+        Assert.False(workflow.IsConnected);
+        Assert.Contains(messages.Requests, request => request.Message.Contains("already owned", StringComparison.Ordinal));
+    }
+
     private static MainWorkflowViewModel CreateWorkflow(FakeSerialPortService service, FakeExecutionInhibitor? inhibitor = null) =>
         new(service, inhibitor ?? new FakeExecutionInhibitor(), new FakeMessageService());
 
@@ -177,6 +199,28 @@ public sealed class AvaloniaMainWorkflowTests
 
     private sealed class FakeLease : IAsyncDisposable
     {
+        public int DisposeCount { get; private set; }
+        public ValueTask DisposeAsync() { DisposeCount++; return ValueTask.CompletedTask; }
+    }
+
+    private sealed class FakeResourceLocks : IMachineResourceLockProvider
+    {
+        public FakeResourceLock Lock { get; } = new();
+        public string? AcquiredResource { get; private set; }
+        public bool Fail { get; set; }
+
+        public OperationResult<IMachineResourceLock> TryAcquire(string resourceId)
+        {
+            AcquiredResource = resourceId;
+            return Fail
+                ? OperationResult<IMachineResourceLock>.Failure("Machine resource is already owned by another process.", resourceId)
+                : OperationResult<IMachineResourceLock>.Success(Lock);
+        }
+    }
+
+    private sealed class FakeResourceLock : IMachineResourceLock
+    {
+        public string ResourceId => "/dev/ttyUSB0";
         public int DisposeCount { get; private set; }
         public ValueTask DisposeAsync() { DisposeCount++; return ValueTask.CompletedTask; }
     }

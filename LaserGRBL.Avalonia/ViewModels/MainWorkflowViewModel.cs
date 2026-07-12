@@ -19,9 +19,11 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private readonly IJobPreviewRenderer previewRenderer;
     private readonly IPreview3DRenderer preview3DRenderer;
     private readonly IOpenGlPreviewContextFactory openGlContextFactory;
+    private readonly IMachineResourceLockProvider? resourceLocks;
     private readonly PreviewRenderStyle previewStyle;
     private readonly GCodeJob job = new();
     private ISerialConnection? connection;
+    private IMachineResourceLock? resourceLock;
     private MachineSession session;
     private IAsyncDisposable? sleepLease;
     private bool isBusy;
@@ -42,7 +44,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private PreviewCamera3D preview3DCamera = new();
     private OpenGlPreviewContextStatus preview3DStatus;
 
-    public MainWorkflowViewModel(ISerialPortService serialPorts, IExecutionInhibitor executionInhibitor, IMessageService messages, IJobPreviewRenderer? previewRenderer = null, PreviewRenderStyle? previewStyle = null, IPreview3DRenderer? preview3DRenderer = null, IOpenGlPreviewContextFactory? openGlContextFactory = null)
+    public MainWorkflowViewModel(ISerialPortService serialPorts, IExecutionInhibitor executionInhibitor, IMessageService messages, IJobPreviewRenderer? previewRenderer = null, PreviewRenderStyle? previewStyle = null, IPreview3DRenderer? preview3DRenderer = null, IOpenGlPreviewContextFactory? openGlContextFactory = null, IMachineResourceLockProvider? resourceLocks = null)
     {
         this.serialPorts = serialPorts;
         this.executionInhibitor = executionInhibitor;
@@ -50,6 +52,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
         this.previewRenderer = previewRenderer ?? new GCodePreviewRenderer();
         this.preview3DRenderer = preview3DRenderer ?? new Preview3DSceneBuilder();
         this.openGlContextFactory = openGlContextFactory ?? new AvaloniaOpenGlPreviewContextFactory();
+        this.resourceLocks = resourceLocks;
         this.previewStyle = previewStyle ?? PreviewRenderStyle.FromScheme(ColorSchemeCatalog.Default.Get("Default"));
         previewScene = PreviewSceneModel.Empty(this.previewStyle);
         preview3DScene = this.preview3DRenderer.BuildScene(previewScene);
@@ -185,9 +188,21 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
 
         await RunUiOperationAsync(async () =>
         {
+            if (resourceLocks?.TryAcquire(SelectedPort.DevicePath) is { } lockResult)
+            {
+                if (!lockResult.Succeeded || lockResult.Value is null)
+                {
+                    await ReportErrorAsync("Unable to acquire machine resource lock.", lockResult.Error, cancellationToken);
+                    return;
+                }
+
+                resourceLock = lockResult.Value;
+            }
+
             var result = await serialPorts.OpenAsync(SelectedPort, new SerialPortOptions(SelectedBaudRate), cancellationToken);
             if (!result.Succeeded || result.Value is null)
             {
+                await ReleaseResourceLockAsync();
                 await ReportErrorAsync("Unable to open serial connection.", result.Error, cancellationToken);
                 return;
             }
@@ -211,6 +226,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
             IsPaused = false;
             if (connection is not null) await connection.DisposeAsync();
             connection = null;
+            await ReleaseResourceLockAsync();
             await session.DisconnectAsync(cancellationToken);
             StatusText = "Disconnected";
             AddLog("Disconnected.");
@@ -339,6 +355,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     {
         await ReleaseInhibitorAsync();
         if (connection is not null) await connection.DisposeAsync();
+        await ReleaseResourceLockAsync();
     }
 
     private MachineSession CreateSession(FirmwareType firmware)
@@ -366,7 +383,12 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
 
     private async Task ReportErrorAsync(string message, OperationError? error, CancellationToken cancellationToken, MessageSeverity severity = MessageSeverity.Error)
     {
-        var detail = error?.Detail is null ? message : $"{message} {error.Detail}";
+        var detail = error switch
+        {
+            null => message,
+            { Detail: null } => $"{message} {error.Message}",
+            _ => $"{message} {error.Message} {error.Detail}"
+        };
         AddLog(detail);
         await messages.ShowAsync(new MessageRequest("LaserGRBL", detail, severity), cancellationToken);
     }
@@ -376,6 +398,12 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
         if (sleepLease is null) return;
         await sleepLease.DisposeAsync();
         sleepLease = null;
+    }
+
+    private async Task ReleaseResourceLockAsync()
+    {
+        if (resourceLock is not null) await resourceLock.DisposeAsync();
+        resourceLock = null;
     }
 
     private void AddLog(string line)
