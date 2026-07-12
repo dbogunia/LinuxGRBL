@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-lasergrbl-project">
+    <comment>LaserGRBL project</comment>
+    <glob pattern="*.lps"/>
+  </mime-type>
+  <mime-type type="application/x-gcode">
+    <comment>G-code program</comment>
+    <glob pattern="*.nc"/>
+    <glob pattern="*.cnc"/>
+    <glob pattern="*.tap"/>
+    <glob pattern="*.gcode"/>
+    <glob pattern="*.ngc"/>
+  </mime-type>
+</mime-info>

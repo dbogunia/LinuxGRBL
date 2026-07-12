@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=LaserGRBL
+Comment=Linux laser engraving controller
+Exec=LaserGRBL.Avalonia %f
+Icon=linuxgrbl
+Terminal=false
+Categories=Graphics;Engineering;
+MimeType=application/x-lasergrbl-project;application/x-gcode;image/svg+xml;image/png;image/jpeg;image/gif;image/bmp;
+StartupNotify=true

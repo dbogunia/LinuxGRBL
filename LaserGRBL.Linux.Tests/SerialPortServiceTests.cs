@@ -24,6 +24,7 @@ public sealed class SerialPortServiceTests : IDisposable
         Assert.True(result.Succeeded);
         Assert.Equal(3, result.Value?.Count);
         Assert.DoesNotContain(result.Value!, port => port.DisplayName == "ttyS0");
+        Assert.StartsWith(byId, result.Value![0].DevicePath, StringComparison.Ordinal);
     }
 
     [Fact]

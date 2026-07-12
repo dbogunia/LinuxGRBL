@@ -16,6 +16,8 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow { DataContext = Services.MainWindow };
+            if (StartupFileArguments.FirstOpenPath(desktop.Args) is { } path)
+                _ = Services.Workflow.LoadFileAsync(path);
         }
 
         base.OnFrameworkInitializationCompleted();
