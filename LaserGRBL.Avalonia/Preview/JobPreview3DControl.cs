@@ -8,6 +8,8 @@ namespace LaserGRBL.Avalonia.Preview;
 
 public sealed class JobPreview3DControl : OpenGlControlBase
 {
+    private OpenGlImmediatePreviewRenderer? renderer;
+
     public static readonly StyledProperty<Preview3DSceneModel?> SceneProperty =
         AvaloniaProperty.Register<JobPreview3DControl, Preview3DSceneModel?>(nameof(Scene));
 
@@ -72,27 +74,45 @@ public sealed class JobPreview3DControl : OpenGlControlBase
 
     protected override void OnOpenGlInit(GlInterface gl)
     {
-        ContextStatus = OpenGlPreviewContextStatus.Success($"Avalonia OpenGL context initialized ({GlVersion}).");
+        try
+        {
+            renderer = OpenGlImmediatePreviewRenderer.FromAvalonia(gl);
+            ContextStatus = OpenGlPreviewContextStatus.Success($"Avalonia OpenGL context initialized ({GlVersion}).");
+        }
+        catch (Exception exception) when (exception is OpenGlPreviewRendererException or EntryPointNotFoundException or AccessViolationException)
+        {
+            renderer = null;
+            ContextStatus = OpenGlPreviewContextStatus.Failure(exception.Message);
+        }
         base.OnOpenGlInit(gl);
     }
 
     protected override void OnOpenGlDeinit(GlInterface gl)
     {
+        renderer = null;
         ContextStatus = OpenGlPreviewContextStatus.Failure("Avalonia OpenGL context was released.");
         base.OnOpenGlDeinit(gl);
     }
 
     protected override void OnOpenGlLost()
     {
+        renderer = null;
         ContextStatus = OpenGlPreviewContextStatus.Failure("Avalonia OpenGL context was lost.");
         base.OnOpenGlLost();
     }
 
     protected override void OnOpenGlRender(GlInterface gl, int fb)
     {
-        // GL context hosting is active here. The current task keeps draw command generation
-        // in the UI-independent 3D scene and uses Avalonia drawing as the visible fallback
-        // until the shader/buffer backend is filled in.
+        if (Scene is null || renderer is null) return;
+        try
+        {
+            renderer.Render(Scene, Camera, Math.Max(1, (int)Bounds.Width), Math.Max(1, (int)Bounds.Height));
+            ContextStatus = OpenGlPreviewContextStatus.Success($"Avalonia OpenGL rendered frame ({GlVersion}).");
+        }
+        catch (Exception exception) when (exception is OpenGlPreviewRendererException or EntryPointNotFoundException or AccessViolationException)
+        {
+            ContextStatus = OpenGlPreviewContextStatus.Failure(exception.Message);
+        }
     }
 
     private void DrawDiagnostic(DrawingContext context, Preview3DSceneModel scene, Rect bounds)
