@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using LaserGRBL.Avalonia.Preview;
+using LaserGRBL.Avalonia.Services;
 using LaserGRBL.Core.Abstractions;
 using LaserGRBL.Core.GCode;
 using LaserGRBL.Core.Protocol;
@@ -14,6 +16,8 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private readonly ISerialPortService serialPorts;
     private readonly IExecutionInhibitor executionInhibitor;
     private readonly IMessageService messages;
+    private readonly IJobPreviewRenderer previewRenderer;
+    private readonly PreviewRenderStyle previewStyle;
     private readonly GCodeJob job = new();
     private ISerialConnection? connection;
     private MachineSession session;
@@ -29,12 +33,18 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private string manualCommand = "";
     private string statusText = "Disconnected";
     private string machineCoordinates = "X0 Y0 Z0";
+    private MachinePosition currentMachinePosition = MachinePosition.Zero;
+    private PreviewSceneModel previewScene;
+    private PreviewInteractionState previewInteraction = new();
 
-    public MainWorkflowViewModel(ISerialPortService serialPorts, IExecutionInhibitor executionInhibitor, IMessageService messages)
+    public MainWorkflowViewModel(ISerialPortService serialPorts, IExecutionInhibitor executionInhibitor, IMessageService messages, IJobPreviewRenderer? previewRenderer = null, PreviewRenderStyle? previewStyle = null)
     {
         this.serialPorts = serialPorts;
         this.executionInhibitor = executionInhibitor;
         this.messages = messages;
+        this.previewRenderer = previewRenderer ?? new GCodePreviewRenderer();
+        this.previewStyle = previewStyle ?? PreviewRenderStyle.FromScheme(ColorSchemeCatalog.Default.Get("Default"));
+        previewScene = PreviewSceneModel.Empty(this.previewStyle);
         session = CreateSession(selectedFirmware);
         FirmwareTypes = Enum.GetValues<FirmwareType>();
         BaudRates = [9600, 57600, 115200, 230400, 250000];
@@ -54,6 +64,13 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
         JogYNegativeCommand = new AsyncWorkflowCommand(() => JogAsync("Y-", 1, 1000), () => CanJog);
         JogZPositiveCommand = new AsyncWorkflowCommand(() => JogAsync("Z+", 1, 500), () => CanJog);
         JogZNegativeCommand = new AsyncWorkflowCommand(() => JogAsync("Z-", 1, 500), () => CanJog);
+        PreviewZoomInCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.ZoomBy(1.25));
+        PreviewZoomOutCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.ZoomBy(0.8));
+        PreviewAutoFitCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.AutoFit());
+        PreviewPanLeftCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.PanBy(-24, 0));
+        PreviewPanRightCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.PanBy(24, 0));
+        PreviewPanUpCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.PanBy(0, -24));
+        PreviewPanDownCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.PanBy(0, 24));
         AddLog("Workflow ready.");
     }
 
@@ -79,6 +96,13 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     public ICommand JogYNegativeCommand { get; }
     public ICommand JogZPositiveCommand { get; }
     public ICommand JogZNegativeCommand { get; }
+    public ICommand PreviewZoomInCommand { get; }
+    public ICommand PreviewZoomOutCommand { get; }
+    public ICommand PreviewAutoFitCommand { get; }
+    public ICommand PreviewPanLeftCommand { get; }
+    public ICommand PreviewPanRightCommand { get; }
+    public ICommand PreviewPanUpCommand { get; }
+    public ICommand PreviewPanDownCommand { get; }
     public FirmwareType ActiveFirmware => session.Firmware;
 
     public SerialPortDescriptor? SelectedPort { get => selectedPort; set { if (Set(ref selectedPort, value)) OnStateChanged(); } }
@@ -88,6 +112,8 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     public string StatusText { get => statusText; private set => Set(ref statusText, value); }
     public string MachineCoordinates { get => machineCoordinates; private set => Set(ref machineCoordinates, value); }
     public string? LastFilePath { get => lastFilePath; private set => Set(ref lastFilePath, value); }
+    public PreviewSceneModel PreviewScene { get => previewScene; private set => Set(ref previewScene, value); }
+    public PreviewInteractionState PreviewInteraction { get => previewInteraction; private set => Set(ref previewInteraction, value); }
     public bool IsConnected => connection is not null && session.Status != MachineStatus.Disconnected;
     public bool IsBusy { get => isBusy; private set { if (Set(ref isBusy, value)) OnStateChanged(); } }
     public bool HasLoadedFile { get => hasLoadedFile; private set { if (Set(ref hasLoadedFile, value)) OnStateChanged(); } }
@@ -186,6 +212,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
 
             HasLoadedFile = job.Lines.Count > 0;
             LastFilePath = path;
+            UpdatePreview(progress: 0);
             AddLog($"{(append ? "Appended" : "Loaded")} {job.Lines.Count} G-code line(s) from {Path.GetFileName(path)}.");
         });
     }
@@ -207,6 +234,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
             IsJobActive = true;
             IsPaused = false;
             StatusText = "Run";
+            UpdatePreview(progress: 1);
             AddLog("Job started.");
         });
     }
@@ -291,8 +319,14 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     {
         var next = new MachineSession(firmware, new SystemMonotonicClock(), new ImmediateDispatcher());
         next.PositionChanged += (_, position) => MachineCoordinates = $"X{position.X:0.###} Y{position.Y:0.###} Z{position.Z:0.###}";
+        next.PositionChanged += (_, position) => { currentMachinePosition = position; UpdatePreview(PreviewScene.Progress); };
         next.StatusChanged += (_, status) => StatusText = status.ToString();
         return next;
+    }
+
+    private void UpdatePreview(double progress)
+    {
+        PreviewScene = previewRenderer.BuildScene(job, previewStyle, progress, currentMachinePosition);
     }
 
     private async Task RunUiOperationAsync(Func<Task> action)
@@ -367,5 +401,12 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
         }
 
         public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private sealed class RelayCommand(Action execute) : ICommand
+    {
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
+        public bool CanExecute(object? parameter) => true;
+        public void Execute(object? parameter) => execute();
     }
 }

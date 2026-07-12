@@ -1,4 +1,5 @@
 using LaserGRBL.Avalonia.ViewModels;
+using LaserGRBL.Avalonia.Preview;
 using LaserGRBL.Core.Abstractions;
 using LaserGRBL.Platform.Contracts;
 using LaserGRBL.Platform.Implementations;
@@ -28,7 +29,7 @@ public static class AppBootstrapper
 
         var serialPorts = new LinuxSerialPortService();
         var messageService = new LoggingMessageService(logger);
-        var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService);
+        var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme));
         var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics, workflow);
         return new AppServices(paths, settings, processes, serialPorts, new LinuxWifiService(processes), inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow);
     }
