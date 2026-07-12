@@ -70,6 +70,29 @@ public sealed class AvaloniaMainWorkflowTests
     }
 
     [Fact]
+    public async Task File_load_and_run_update_preview_scene()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"lasergrbl-{Guid.NewGuid():N}.gcode");
+        await File.WriteAllLinesAsync(path, ["G0 X0 Y0", "G1 X10 Y0", "G1 X10 Y5"]);
+        var service = new FakeSerialPortService();
+        var workflow = CreateWorkflow(service);
+
+        await workflow.RefreshPortsAsync();
+        await workflow.ConnectAsync();
+        await workflow.LoadFileAsync(path);
+
+        Assert.False(workflow.PreviewScene.IsEmpty);
+        Assert.Equal(2, workflow.PreviewScene.Lines.Count);
+        Assert.Equal(0, workflow.PreviewScene.Progress);
+
+        await workflow.RunJobAsync();
+
+        Assert.Equal(1, workflow.PreviewScene.Progress);
+        Assert.Equal(workflow.PreviewScene.Lines.Count, workflow.PreviewScene.CompletedLines.Count);
+        File.Delete(path);
+    }
+
+    [Fact]
     public async Task File_load_failure_routes_message_and_keeps_job_unloaded()
     {
         var messages = new FakeMessageService();

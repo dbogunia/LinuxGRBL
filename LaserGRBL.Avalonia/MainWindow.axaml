@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:preview="clr-namespace:LaserGRBL.Avalonia.Preview"
         x:Class="LaserGRBL.Avalonia.MainWindow"
         Title="{Binding Title}"
         MinWidth="980"
@@ -68,9 +69,18 @@
 
     <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="*,170">
       <Border Margin="14" BorderBrush="{Binding Theme.Border}" BorderThickness="1" CornerRadius="6" Background="{Binding Theme.PreviewBackground}">
-        <Grid>
-          <TextBlock Text="{Binding Workflow.MachineCoordinates}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Theme.PreviewPath}" FontSize="18" />
-          <TextBlock Text="{Binding PreviewSummary}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,54,0,0" Foreground="{Binding Theme.MutedText}" />
+        <Grid RowDefinitions="36,*">
+          <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,*" Margin="10,6" ColumnSpacing="6">
+            <Button Content="Fit" Command="{Binding Workflow.PreviewAutoFitCommand}" />
+            <Button Grid.Column="1" Content="-" Command="{Binding Workflow.PreviewZoomOutCommand}" />
+            <Button Grid.Column="2" Content="+" Command="{Binding Workflow.PreviewZoomInCommand}" />
+            <Button Grid.Column="3" Content="Left" Command="{Binding Workflow.PreviewPanLeftCommand}" />
+            <Button Grid.Column="4" Content="Right" Command="{Binding Workflow.PreviewPanRightCommand}" />
+            <Button Grid.Column="5" Content="Up" Command="{Binding Workflow.PreviewPanUpCommand}" />
+            <Button Grid.Column="6" Content="Down" Command="{Binding Workflow.PreviewPanDownCommand}" />
+            <TextBlock Grid.Column="7" Text="{Binding Workflow.MachineCoordinates}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{Binding Theme.MutedText}" />
+          </Grid>
+          <preview:JobPreviewControl Grid.Row="1" Scene="{Binding Workflow.PreviewScene}" Interaction="{Binding Workflow.PreviewInteraction}" />
         </Grid>
       </Border>
 
