@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-app_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+app_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 applications_dir="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 icons_dir="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor/scalable/apps"
 mime_dir="${XDG_DATA_HOME:-$HOME/.local/share}/mime/packages"

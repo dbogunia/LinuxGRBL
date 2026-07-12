@@ -53,6 +53,7 @@ public sealed class LinuxPackagingDeviceAccessTests
         var installer = File.ReadAllText(Path.Combine(RepositoryRoot(), "packaging", "linux", "install-desktop-integration.sh"));
 
         Assert.Contains("app_dir=", installer);
+        Assert.Contains("dirname \"${BASH_SOURCE[0]}\"", installer);
         Assert.Contains("Exec=$app_dir/LaserGRBL.Avalonia %f", installer);
         Assert.Contains("update-mime-database", installer);
         Assert.DoesNotContain("sudo", installer);
