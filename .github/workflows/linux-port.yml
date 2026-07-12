@@ -1,0 +1,49 @@
+name: Linux port
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+jobs:
+  linux-port:
+    name: Linux port build and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Show SDK
+        run: dotnet --info
+
+      - name: Restore Linux solution
+        run: dotnet restore LaserGRBL.Linux.sln
+
+      - name: Build Linux solution
+        run: dotnet build LaserGRBL.Linux.sln --no-restore -m:1
+
+      - name: Test Linux solution
+        run: dotnet test LaserGRBL.Linux.sln --no-build -m:1 /nr:false
+
+      - name: Validate package metadata
+        run: |
+          test -f packaging/linux/package-manifest.json
+          test -f packaging/linux/THIRD-PARTY-NOTICES.md
+          test -x scripts/build-linux-tarball.sh
+          grep -q '"format": "tar.gz"' packaging/linux/package-manifest.json
+          grep -q '"integrityAlgorithm": "SHA256"' packaging/linux/package-manifest.json
+          grep -q 'dotnet publish' scripts/build-linux-tarball.sh
+          grep -q 'sha256sum' scripts/build-linux-tarball.sh
+
+      - name: Guard Linux CI target
+        run: |
+          ! grep -R "dotnet .*LaserGRBL.sln" .github/workflows
+          grep -R "LaserGRBL.Linux.sln" .github/workflows
