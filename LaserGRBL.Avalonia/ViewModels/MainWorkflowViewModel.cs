@@ -17,6 +17,8 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private readonly IExecutionInhibitor executionInhibitor;
     private readonly IMessageService messages;
     private readonly IJobPreviewRenderer previewRenderer;
+    private readonly IPreview3DRenderer preview3DRenderer;
+    private readonly IOpenGlPreviewContextFactory openGlContextFactory;
     private readonly PreviewRenderStyle previewStyle;
     private readonly GCodeJob job = new();
     private ISerialConnection? connection;
@@ -36,15 +38,22 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private MachinePosition currentMachinePosition = MachinePosition.Zero;
     private PreviewSceneModel previewScene;
     private PreviewInteractionState previewInteraction = new();
+    private Preview3DSceneModel preview3DScene;
+    private PreviewCamera3D preview3DCamera = new();
+    private OpenGlPreviewContextStatus preview3DStatus;
 
-    public MainWorkflowViewModel(ISerialPortService serialPorts, IExecutionInhibitor executionInhibitor, IMessageService messages, IJobPreviewRenderer? previewRenderer = null, PreviewRenderStyle? previewStyle = null)
+    public MainWorkflowViewModel(ISerialPortService serialPorts, IExecutionInhibitor executionInhibitor, IMessageService messages, IJobPreviewRenderer? previewRenderer = null, PreviewRenderStyle? previewStyle = null, IPreview3DRenderer? preview3DRenderer = null, IOpenGlPreviewContextFactory? openGlContextFactory = null)
     {
         this.serialPorts = serialPorts;
         this.executionInhibitor = executionInhibitor;
         this.messages = messages;
         this.previewRenderer = previewRenderer ?? new GCodePreviewRenderer();
+        this.preview3DRenderer = preview3DRenderer ?? new Preview3DSceneBuilder();
+        this.openGlContextFactory = openGlContextFactory ?? new AvaloniaOpenGlPreviewContextFactory();
         this.previewStyle = previewStyle ?? PreviewRenderStyle.FromScheme(ColorSchemeCatalog.Default.Get("Default"));
         previewScene = PreviewSceneModel.Empty(this.previewStyle);
+        preview3DScene = this.preview3DRenderer.BuildScene(previewScene);
+        preview3DStatus = this.openGlContextFactory.Probe();
         session = CreateSession(selectedFirmware);
         FirmwareTypes = Enum.GetValues<FirmwareType>();
         BaudRates = [9600, 57600, 115200, 230400, 250000];
@@ -71,6 +80,13 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
         PreviewPanRightCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.PanBy(24, 0));
         PreviewPanUpCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.PanBy(0, -24));
         PreviewPanDownCommand = new RelayCommand(() => PreviewInteraction = PreviewInteraction.PanBy(0, 24));
+        Preview3DZoomInCommand = new RelayCommand(() => Preview3DCamera = Preview3DCamera.ZoomBy(1.25));
+        Preview3DZoomOutCommand = new RelayCommand(() => Preview3DCamera = Preview3DCamera.ZoomBy(0.8));
+        Preview3DRotateLeftCommand = new RelayCommand(() => Preview3DCamera = Preview3DCamera.RotateBy(0, 0, -8));
+        Preview3DRotateRightCommand = new RelayCommand(() => Preview3DCamera = Preview3DCamera.RotateBy(0, 0, 8));
+        Preview3DTiltUpCommand = new RelayCommand(() => Preview3DCamera = Preview3DCamera.RotateBy(-6, 0));
+        Preview3DTiltDownCommand = new RelayCommand(() => Preview3DCamera = Preview3DCamera.RotateBy(6, 0));
+        Preview3DAutoFitCommand = new RelayCommand(() => Preview3DCamera = Preview3DCamera.Reset());
         AddLog("Workflow ready.");
     }
 
@@ -103,6 +119,13 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     public ICommand PreviewPanRightCommand { get; }
     public ICommand PreviewPanUpCommand { get; }
     public ICommand PreviewPanDownCommand { get; }
+    public ICommand Preview3DZoomInCommand { get; }
+    public ICommand Preview3DZoomOutCommand { get; }
+    public ICommand Preview3DRotateLeftCommand { get; }
+    public ICommand Preview3DRotateRightCommand { get; }
+    public ICommand Preview3DTiltUpCommand { get; }
+    public ICommand Preview3DTiltDownCommand { get; }
+    public ICommand Preview3DAutoFitCommand { get; }
     public FirmwareType ActiveFirmware => session.Firmware;
 
     public SerialPortDescriptor? SelectedPort { get => selectedPort; set { if (Set(ref selectedPort, value)) OnStateChanged(); } }
@@ -114,6 +137,9 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     public string? LastFilePath { get => lastFilePath; private set => Set(ref lastFilePath, value); }
     public PreviewSceneModel PreviewScene { get => previewScene; private set => Set(ref previewScene, value); }
     public PreviewInteractionState PreviewInteraction { get => previewInteraction; private set => Set(ref previewInteraction, value); }
+    public Preview3DSceneModel Preview3DScene { get => preview3DScene; private set => Set(ref preview3DScene, value); }
+    public PreviewCamera3D Preview3DCamera { get => preview3DCamera; private set => Set(ref preview3DCamera, value); }
+    public OpenGlPreviewContextStatus Preview3DStatus { get => preview3DStatus; private set => Set(ref preview3DStatus, value); }
     public bool IsConnected => connection is not null && session.Status != MachineStatus.Disconnected;
     public bool IsBusy { get => isBusy; private set { if (Set(ref isBusy, value)) OnStateChanged(); } }
     public bool HasLoadedFile { get => hasLoadedFile; private set { if (Set(ref hasLoadedFile, value)) OnStateChanged(); } }
@@ -327,6 +353,8 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private void UpdatePreview(double progress)
     {
         PreviewScene = previewRenderer.BuildScene(job, previewStyle, progress, currentMachinePosition);
+        Preview3DStatus = openGlContextFactory.Probe();
+        Preview3DScene = preview3DRenderer.BuildScene(PreviewScene);
     }
 
     private async Task RunUiOperationAsync(Func<Task> action)
