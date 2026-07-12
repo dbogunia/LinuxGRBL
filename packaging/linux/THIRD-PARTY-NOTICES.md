@@ -9,6 +9,8 @@ The Linux tarball is produced by `dotnet publish` from the SDK-style projects an
 - Avalonia 12.0.5
 - Avalonia.Desktop 12.0.5
 - Avalonia.Themes.Fluent 12.0.5
+- SkiaSharp 3.119.4
+- SkiaSharp.NativeAssets.Linux 3.119.4
 - System.IO.Ports 8.0.0
 
 When published self-contained, the selected .NET runtime for the target RID is bundled by the .NET SDK. The package manifest records this as `self-contained`.
