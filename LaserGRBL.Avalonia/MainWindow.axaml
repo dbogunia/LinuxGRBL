@@ -8,64 +8,86 @@
         Height="760"
         x:CompileBindings="False"
         Background="{Binding Theme.WindowBackground}">
-  <Grid RowDefinitions="48,*,120" ColumnDefinitions="300,*">
+  <Grid RowDefinitions="48,*,120" ColumnDefinitions="320,*">
     <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{Binding Theme.HeaderBackground}" BorderBrush="{Binding Theme.Border}" BorderThickness="0,0,0,1">
       <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
         <TextBlock Text="LaserGRBL" VerticalAlignment="Center" FontSize="18" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
-        <TextBlock Grid.Column="1" Text="{Binding StatusText}" VerticalAlignment="Center" Margin="18,0,0,0" Foreground="{Binding Theme.MutedText}" />
-        <TextBlock Grid.Column="2" Text="{Binding FirmwareText}" VerticalAlignment="Center" Foreground="{Binding Theme.MutedText}" />
+        <TextBlock Grid.Column="1" Text="{Binding Workflow.StatusText}" VerticalAlignment="Center" Margin="18,0,0,0" Foreground="{Binding Theme.MutedText}" />
+        <TextBlock Grid.Column="2" Text="{Binding Workflow.ActiveFirmware}" VerticalAlignment="Center" Foreground="{Binding Theme.MutedText}" />
       </Grid>
     </Border>
 
     <Border Grid.Row="1" Grid.Column="0" Background="{Binding Theme.PanelBackground}" BorderBrush="{Binding Theme.Border}" BorderThickness="0,0,1,0">
-      <StackPanel Margin="14" Spacing="12">
-        <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
-        <Border MinHeight="96" Padding="12" BorderBrush="{Binding Theme.Border}" BorderThickness="1" CornerRadius="6" Background="{Binding Theme.SurfaceBackground}">
-          <StackPanel Spacing="8">
-            <TextBlock Text="{Binding ConnectionSummary}" Foreground="{Binding Theme.Text}" />
-            <TextBlock Text="{Binding DeviceAccessSummary}" TextWrapping="Wrap" Foreground="{Binding Theme.MutedText}" />
-          </StackPanel>
-        </Border>
+      <ScrollViewer>
+        <StackPanel Margin="14" Spacing="12">
+          <TextBlock Text="Connection" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
+          <Border MinHeight="128" Padding="12" BorderBrush="{Binding Theme.Border}" BorderThickness="1" CornerRadius="6" Background="{Binding Theme.SurfaceBackground}">
+            <StackPanel Spacing="8">
+              <ComboBox ItemsSource="{Binding Workflow.Ports}" SelectedItem="{Binding Workflow.SelectedPort}" DisplayMemberBinding="{Binding DisplayName}" />
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <ComboBox ItemsSource="{Binding Workflow.BaudRates}" SelectedItem="{Binding Workflow.SelectedBaudRate}" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Workflow.FirmwareTypes}" SelectedItem="{Binding Workflow.SelectedFirmware}" />
+              </Grid>
+              <Button Content="Refresh ports" Command="{Binding Workflow.RefreshPortsCommand}" />
+            </StackPanel>
+          </Border>
 
-        <TextBlock Text="Controls" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
-        <Grid ColumnDefinitions="*,*" RowDefinitions="40,40,40" ColumnSpacing="8" RowSpacing="8">
-          <Button Content="Connect" IsEnabled="False" />
-          <Button Grid.Column="1" Content="Disconnect" IsEnabled="False" />
-          <Button Grid.Row="1" Content="Run" IsEnabled="False" />
-          <Button Grid.Row="1" Grid.Column="1" Content="Hold" IsEnabled="False" />
-          <Button Grid.Row="2" Content="Reset" IsEnabled="False" />
-          <Button Grid.Row="2" Grid.Column="1" Content="Unlock" IsEnabled="False" />
-        </Grid>
+          <TextBlock Text="Controls" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
+          <Grid ColumnDefinitions="*,*" RowDefinitions="40,40,40,40" ColumnSpacing="8" RowSpacing="8">
+            <Button Content="Connect" Command="{Binding Workflow.ConnectCommand}" />
+            <Button Grid.Column="1" Content="Disconnect" Command="{Binding Workflow.DisconnectCommand}" />
+            <Button Grid.Row="1" Content="Run" Command="{Binding Workflow.RunCommand}" />
+            <Button Grid.Row="1" Grid.Column="1" Content="Hold" Command="{Binding Workflow.HoldCommand}" />
+            <Button Grid.Row="2" Content="Resume" Command="{Binding Workflow.ResumeCommand}" />
+            <Button Grid.Row="2" Grid.Column="1" Content="Stop" Command="{Binding Workflow.StopCommand}" />
+            <Button Grid.Row="3" Content="Reset" Command="{Binding Workflow.ResetCommand}" />
+            <Button Grid.Row="3" Grid.Column="1" Content="Reopen" Command="{Binding Workflow.ReopenLastFileCommand}" />
+          </Grid>
 
-        <TextBlock Text="Diagnostics" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
-        <ItemsControl ItemsSource="{Binding Diagnostics}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding}" TextWrapping="Wrap" Foreground="{Binding $parent[Window].DataContext.Theme.Warning}" Margin="0,0,0,6" />
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-      </StackPanel>
+          <TextBlock Text="Jog" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
+          <Grid ColumnDefinitions="*,*,*" RowDefinitions="34,34,34" ColumnSpacing="6" RowSpacing="6">
+            <Button Grid.Column="1" Content="Y+" Command="{Binding Workflow.JogYPositiveCommand}" />
+            <Button Grid.Row="1" Content="X-" Command="{Binding Workflow.JogXNegativeCommand}" />
+            <Button Grid.Row="1" Grid.Column="2" Content="X+" Command="{Binding Workflow.JogXPositiveCommand}" />
+            <Button Grid.Row="2" Grid.Column="1" Content="Y-" Command="{Binding Workflow.JogYNegativeCommand}" />
+            <Button Grid.Row="0" Grid.Column="2" Content="Z+" Command="{Binding Workflow.JogZPositiveCommand}" />
+            <Button Grid.Row="2" Grid.Column="2" Content="Z-" Command="{Binding Workflow.JogZNegativeCommand}" />
+          </Grid>
+
+          <TextBlock Text="Diagnostics" FontWeight="SemiBold" Foreground="{Binding Theme.Text}" />
+          <ItemsControl ItemsSource="{Binding Diagnostics}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" TextWrapping="Wrap" Foreground="{Binding $parent[Window].DataContext.Theme.Warning}" Margin="0,0,0,6" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
     </Border>
 
     <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="*,170">
       <Border Margin="14" BorderBrush="{Binding Theme.Border}" BorderThickness="1" CornerRadius="6" Background="{Binding Theme.PreviewBackground}">
         <Grid>
-          <TextBlock Text="Preview renderer placeholder" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Theme.PreviewPath}" FontSize="18" />
+          <TextBlock Text="{Binding Workflow.MachineCoordinates}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Theme.PreviewPath}" FontSize="18" />
           <TextBlock Text="{Binding PreviewSummary}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,54,0,0" Foreground="{Binding Theme.MutedText}" />
         </Grid>
       </Border>
 
       <Border Grid.Row="1" Margin="14,0,14,14" BorderBrush="{Binding Theme.Border}" BorderThickness="1" CornerRadius="6" Background="{Binding Theme.LogBackground}">
-        <Grid RowDefinitions="32,*">
+        <Grid RowDefinitions="32,*,40">
           <TextBlock Text="Log" Margin="12,8,12,0" FontWeight="SemiBold" Foreground="{Binding Theme.LogText}" />
-          <ItemsControl Grid.Row="1" Margin="12,4,12,12" ItemsSource="{Binding LogLines}">
+          <ItemsControl Grid.Row="1" Margin="12,4,12,8" ItemsSource="{Binding Workflow.LogLines}">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
                 <TextBlock Text="{Binding}" Foreground="{Binding $parent[Window].DataContext.Theme.LogText}" />
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
+          <Grid Grid.Row="2" ColumnDefinitions="*,120" Margin="12,0,12,10" ColumnSpacing="8">
+            <TextBox Text="{Binding Workflow.ManualCommand}" PlaceholderText="Manual command" />
+            <Button Grid.Column="1" Content="Send" Command="{Binding Workflow.SendManualCommand}" />
+          </Grid>
         </Grid>
       </Border>
     </Grid>

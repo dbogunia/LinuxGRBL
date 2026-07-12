@@ -41,7 +41,7 @@ public sealed class AvaloniaAppShellTests
         var diagnostics = new StartupDiagnostics();
         diagnostics.Add("Secret store unavailable.");
         var paths = new LinuxAppPaths("LaserGRBL", _ => null, "/home/test", "/tmp");
-        var viewModel = new MainWindowViewModel(paths, new JsonSettingsStore(paths), ColorSchemeCatalog.Default.Get("Default"), LocalizationCatalog.Default, diagnostics);
+        var viewModel = new MainWindowViewModel(paths, new JsonSettingsStore(paths), ColorSchemeCatalog.Default.Get("Default"), LocalizationCatalog.Default, diagnostics, new MainWorkflowViewModel(new InMemorySerialPortService(), new UnavailableExecutionInhibitor(), new TestMessageService()));
 
         Assert.Equal("LaserGRBL", viewModel.Title);
         Assert.Equal("Disconnected", viewModel.StatusText);
@@ -73,5 +73,10 @@ public sealed class AvaloniaAppShellTests
 
         Assert.NotNull(viewModel.Theme);
         Assert.NotEmpty(viewModel.LogLines);
+    }
+
+    private sealed class TestMessageService : IMessageService
+    {
+        public Task<bool> ShowAsync(MessageRequest request, CancellationToken cancellationToken = default) => Task.FromResult(true);
     }
 }
