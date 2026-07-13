@@ -34,7 +34,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.Equal(expected.ColorScheme, loaded.Value?.ColorScheme);
         Assert.Equal(expected.RecentFiles, loaded.Value?.RecentFiles);
         Assert.Equal(expected.Language, loaded.Value?.Language);
-        Assert.Contains("\"SchemaVersion\": 2", await File.ReadAllTextAsync(store.FilePath));
+        Assert.Contains($"\"SchemaVersion\": {PortSettings.CurrentSchemaVersion}", await File.ReadAllTextAsync(store.FilePath));
     }
 
     [Fact]

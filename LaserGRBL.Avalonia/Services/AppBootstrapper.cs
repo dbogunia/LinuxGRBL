@@ -1,6 +1,7 @@
 using LaserGRBL.Avalonia.ViewModels;
 using LaserGRBL.Avalonia.Preview;
 using LaserGRBL.Core.Abstractions;
+using LaserGRBL.Core.Safety;
 using LaserGRBL.Platform.Contracts;
 using LaserGRBL.Platform.Implementations;
 
@@ -19,6 +20,7 @@ public static class AppBootstrapper
         logger.Info("Avalonia app shell bootstrap started.");
         var settings = new JsonSettingsStore(paths);
         var persistedSettings = settings.LoadAsync().GetAwaiter().GetResult().Value ?? LaserGRBL.Core.Settings.PortSettings.Default;
+        var safetyGate = new SafetyAcknowledgementService(persistedSettings.SafetyAcknowledgements);
         var localization = LocalizationCatalog.Default.ForCulture(persistedSettings.Language);
         var themeCatalog = ColorSchemeCatalog.Default;
         var theme = themeCatalog.Get("Default");
@@ -37,8 +39,8 @@ public static class AppBootstrapper
         var updates = new ReleaseManifestUpdateService(new HttpUpdateManifestClient(), new Uri("https://github.com/dbogunia/LinuxGRBL/releases/latest/download/linuxgrbl-update.json"), new Version(0, 1, 0), enabled: false);
         var packageMetadata = new PackageMetadataService();
         var resourceLocks = new FileMachineResourceLockProvider(Path.Combine(paths.CacheDirectory, "locks"));
-        var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme), new Preview3DSceneBuilder(), new AvaloniaOpenGlPreviewContextFactory(), resourceLocks);
-        var tools = new DialogToolsViewModel(settings, fileDialogs, messageService, wifi, firmwareFlash, localization);
+        var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme), new Preview3DSceneBuilder(), new AvaloniaOpenGlPreviewContextFactory(), resourceLocks, safetyGate);
+        var tools = new DialogToolsViewModel(settings, fileDialogs, messageService, wifi, firmwareFlash, localization, safetyGate: safetyGate);
         var viewModel = new MainWindowViewModel(paths, settings, theme, localization, diagnostics, workflow, tools);
         return new AppServices(paths, settings, processes, serialPorts, wifi, firmwareFlash, fileDialogs, sound, updates, packageMetadata, inhibitor, secretStore, messageService, themeCatalog, localization, logger, diagnostics, viewModel, workflow, tools);
     }

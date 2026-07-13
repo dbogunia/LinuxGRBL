@@ -5,6 +5,7 @@ using System.Windows.Input;
 using LaserGRBL.Avalonia.Services;
 using LaserGRBL.Core.Abstractions;
 using LaserGRBL.Core.Protocol;
+using LaserGRBL.Core.Safety;
 using LaserGRBL.Core.Settings;
 using LaserGRBL.Platform.Contracts;
 using LaserGRBL.Platform.Implementations;
@@ -20,7 +21,8 @@ public sealed class DialogToolsViewModel
         IWifiService wifi,
         IFirmwareFlashService firmware,
         LocalizationCatalog? localization = null,
-        EmulatorActivityConsoleViewModel? emulator = null)
+        EmulatorActivityConsoleViewModel? emulator = null,
+        ISafetyGate? safetyGate = null)
     {
         localization ??= LocalizationCatalog.Default;
         Settings = new SettingsToolViewModel(settings, messages);
@@ -28,7 +30,7 @@ public sealed class DialogToolsViewModel
         Hotkeys = new HotkeyManagerViewModel();
         Materials = new MaterialEditorViewModel();
         Imports = new ImportOptionsToolViewModel(files, messages);
-        Firmware = new FirmwareFlashToolViewModel(firmware, files, messages);
+        Firmware = new FirmwareFlashToolViewModel(firmware, files, messages, safetyGate);
         Wifi = new WifiToolViewModel(wifi, messages);
         GrblConfiguration = new GrblConfigurationToolViewModel(files, messages);
         Projects = new ProjectFileToolViewModel(files, messages);
@@ -242,7 +244,7 @@ public sealed class ImportOptionsToolViewModel(IFileDialogService files, IMessag
 public sealed record RasterImportOptions(int Speed, int Power, bool Dither);
 public sealed record SvgImportOptions(int Speed, bool PreserveColors);
 
-public sealed class FirmwareFlashToolViewModel(IFirmwareFlashService firmware, IFileDialogService files, IMessageService messages) : ToolViewModelBase
+public sealed class FirmwareFlashToolViewModel(IFirmwareFlashService firmware, IFileDialogService files, IMessageService messages, ISafetyGate? safetyGate = null) : ToolViewModelBase
 {
     public string DevicePath { get; set; } = "/dev/ttyACM0";
     public string FirmwarePath { get; private set; } = "";
@@ -259,6 +261,14 @@ public sealed class FirmwareFlashToolViewModel(IFirmwareFlashService firmware, I
 
     public async Task<OperationResult> FlashAsync(CancellationToken cancellationToken = default)
     {
+        var allowed = (safetyGate ?? PermissiveSafetyGate.Instance).EnsureAllowed(RiskyOperation.FirmwareFlash);
+        if (!allowed.Succeeded)
+        {
+            Status = $"Firmware flash blocked: {allowed.Error?.Message}";
+            await messages.ShowAsync(new MessageRequest("Firmware flash", Status, MessageSeverity.Warning), cancellationToken);
+            return allowed;
+        }
+
         var result = await firmware.FlashAsync(new FirmwareFlashRequest(DevicePath, FirmwarePath, BaudRate, DryRun), cancellationToken);
         Status = result.Succeeded ? (DryRun ? "Firmware flash dry-run completed." : "Firmware flash command completed.") : $"Firmware flash failed: {result.Error?.Message}";
         if (!result.Succeeded) await messages.ShowAsync(new MessageRequest("Firmware flash", Status, MessageSeverity.Error), cancellationToken);
