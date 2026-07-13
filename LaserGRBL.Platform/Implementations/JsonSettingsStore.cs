@@ -21,7 +21,7 @@ public sealed class JsonSettingsStore
         {
             await using var stream = File.OpenRead(FilePath);
             var settings = await JsonSerializer.DeserializeAsync<PortSettings>(stream, options, cancellationToken);
-            return OperationResult<PortSettings>.Success(settings is { SchemaVersion: PortSettings.CurrentSchemaVersion } ? settings : PortSettings.Default);
+            return OperationResult<PortSettings>.Success(settings is null || settings.SchemaVersion > PortSettings.CurrentSchemaVersion ? PortSettings.Default : settings.Normalize());
         }
         catch (Exception exception) when (exception is JsonException or IOException)
         {

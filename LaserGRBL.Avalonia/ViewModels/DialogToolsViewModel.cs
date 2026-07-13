@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using LaserGRBL.Avalonia.Services;
 using LaserGRBL.Core.Abstractions;
 using LaserGRBL.Core.Protocol;
 using LaserGRBL.Core.Settings;
@@ -18,8 +19,10 @@ public sealed class DialogToolsViewModel
         IMessageService messages,
         IWifiService wifi,
         IFirmwareFlashService firmware,
+        LocalizationCatalog? localization = null,
         EmulatorActivityConsoleViewModel? emulator = null)
     {
+        localization ??= LocalizationCatalog.Default;
         Settings = new SettingsToolViewModel(settings, messages);
         CustomButtons = new CustomButtonsToolViewModel(files);
         Hotkeys = new HotkeyManagerViewModel();
@@ -32,15 +35,15 @@ public sealed class DialogToolsViewModel
         Emulator = emulator ?? new EmulatorActivityConsoleViewModel();
         Groups =
         [
-            new ToolGroupViewModel("Settings", "Port, firmware, streaming, theme and recent files.", Settings.Status),
-            new ToolGroupViewModel("Custom buttons", "Add/edit/delete/import/export command buttons.", CustomButtons.Status),
-            new ToolGroupViewModel("Hotkeys", "Assign shortcuts and detect conflicts.", Hotkeys.Status),
-            new ToolGroupViewModel("Materials", "Local material database editing scaffold.", Materials.Status),
-            new ToolGroupViewModel("Import", "Raster/SVG/project option routing through file dialogs.", Imports.Status),
-            new ToolGroupViewModel("Firmware", "Dry-run and real firmware flash initiation.", Firmware.Status),
-            new ToolGroupViewModel("WiFi", "Discovery, interface listing and explicit configuration.", Wifi.Status),
-            new ToolGroupViewModel("GRBL config", "Import/export settings text and validation errors.", GrblConfiguration.Status),
-            new ToolGroupViewModel("Emulator", "Read-only bounded emulator activity console.", Emulator.Status)
+            new ToolGroupViewModel(localization.Get("Tool.Settings.Name"), localization.Get("Tool.Settings.Description"), Settings.Status),
+            new ToolGroupViewModel(localization.Get("Tool.CustomButtons.Name"), localization.Get("Tool.CustomButtons.Description"), CustomButtons.Status),
+            new ToolGroupViewModel(localization.Get("Tool.Hotkeys.Name"), localization.Get("Tool.Hotkeys.Description"), Hotkeys.Status),
+            new ToolGroupViewModel(localization.Get("Tool.Materials.Name"), localization.Get("Tool.Materials.Description"), Materials.Status),
+            new ToolGroupViewModel(localization.Get("Tool.Import.Name"), localization.Get("Tool.Import.Description"), Imports.Status),
+            new ToolGroupViewModel(localization.Get("Tool.Firmware.Name"), localization.Get("Tool.Firmware.Description"), Firmware.Status),
+            new ToolGroupViewModel(localization.Get("Tool.Wifi.Name"), localization.Get("Tool.Wifi.Description"), Wifi.Status),
+            new ToolGroupViewModel(localization.Get("Tool.GrblConfig.Name"), localization.Get("Tool.GrblConfig.Description"), GrblConfiguration.Status),
+            new ToolGroupViewModel(localization.Get("Tool.Emulator.Name"), localization.Get("Tool.Emulator.Description"), Emulator.Status)
         ];
     }
 

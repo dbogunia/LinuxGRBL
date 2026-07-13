@@ -23,7 +23,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
     public async Task Saves_and_loads_versioned_settings()
     {
         var store = new JsonSettingsStore(new TestPaths(directory));
-        var expected = new PortSettings(999, FirmwareType.Marlin, StreamingMode.Synchronous, "Dark", [new RecentFile("/tmp/test.nc", DateTimeOffset.UnixEpoch)]);
+        var expected = new PortSettings(999, FirmwareType.Marlin, StreamingMode.Synchronous, "Dark", "pl-PL", [new RecentFile("/tmp/test.nc", DateTimeOffset.UnixEpoch)]);
 
         Assert.True((await store.SaveAsync(expected)).Succeeded);
         var loaded = await store.LoadAsync();
@@ -33,7 +33,8 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.Equal(expected.StreamingMode, loaded.Value?.StreamingMode);
         Assert.Equal(expected.ColorScheme, loaded.Value?.ColorScheme);
         Assert.Equal(expected.RecentFiles, loaded.Value?.RecentFiles);
-        Assert.Contains("\"SchemaVersion\": 1", await File.ReadAllTextAsync(store.FilePath));
+        Assert.Equal(expected.Language, loaded.Value?.Language);
+        Assert.Contains("\"SchemaVersion\": 2", await File.ReadAllTextAsync(store.FilePath));
     }
 
     [Fact]
