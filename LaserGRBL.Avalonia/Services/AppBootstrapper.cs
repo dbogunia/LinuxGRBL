@@ -21,6 +21,7 @@ public static class AppBootstrapper
         var settings = new JsonSettingsStore(paths);
         var persistedSettings = settings.LoadAsync().GetAwaiter().GetResult().Value ?? LaserGRBL.Core.Settings.PortSettings.Default;
         var safetyGate = new SafetyAcknowledgementService(persistedSettings.SafetyAcknowledgements);
+        var privacyPolicy = new PrivacyPolicyService(persistedSettings.Privacy ?? LaserGRBL.Core.Privacy.PrivacySettings.Default);
         var localization = LocalizationCatalog.Default.ForCulture(persistedSettings.Language);
         var themeCatalog = ColorSchemeCatalog.Default;
         var theme = themeCatalog.Get("Default");
@@ -36,7 +37,7 @@ public static class AppBootstrapper
         var fileDialogs = new UnavailableFileDialogService();
         var firmwareFlash = new LinuxFirmwareFlashService(processes);
         var sound = new LinuxSoundService(processes, Path.Combine(AppContext.BaseDirectory, "Sound"));
-        var updates = new ReleaseManifestUpdateService(new HttpUpdateManifestClient(), new Uri("https://github.com/dbogunia/LinuxGRBL/releases/latest/download/linuxgrbl-update.json"), new Version(0, 1, 0), enabled: false);
+        var updates = new ReleaseManifestUpdateService(new HttpUpdateManifestClient(), new Uri("https://github.com/dbogunia/LinuxGRBL/releases/latest/download/linuxgrbl-update.json"), new Version(0, 1, 0), enabled: privacyPolicy.Settings.UpdateChecksEnabled);
         var packageMetadata = new PackageMetadataService();
         var resourceLocks = new FileMachineResourceLockProvider(Path.Combine(paths.CacheDirectory, "locks"));
         var workflow = new MainWorkflowViewModel(serialPorts, inhibitor, messageService, new GCodePreviewRenderer(), PreviewRenderStyle.FromScheme(theme), new Preview3DSceneBuilder(), new AvaloniaOpenGlPreviewContextFactory(), resourceLocks, safetyGate);

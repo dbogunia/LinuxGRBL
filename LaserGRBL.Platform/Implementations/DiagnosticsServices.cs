@@ -188,7 +188,16 @@ public sealed class SupportBundleService
                 request.Settings.StreamingMode,
                 request.Settings.ColorScheme,
                 request.Settings.Language,
-                RecentFileCount = request.Settings.RecentFiles.Count
+                RecentFileCount = request.Settings.RecentFiles.Count,
+                Privacy = new
+                {
+                    request.Settings.Privacy?.TelemetryEnabled,
+                    request.Settings.Privacy?.UpdateChecksEnabled,
+                    request.Settings.Privacy?.MaterialUpdatesEnabled,
+                    request.Settings.Privacy?.UsageStatisticsEnabled,
+                    request.Settings.Privacy?.LaserStatisticsEnabled,
+                    request.Settings.Privacy?.TelegramNotificationsEnabled
+                }
             }, new JsonSerializerOptions { WriteIndented = true }), included);
 
             AddText(archive, "startup-diagnostics.txt", redactor.Redact(string.Join(Environment.NewLine, request.StartupDiagnostics)), included);

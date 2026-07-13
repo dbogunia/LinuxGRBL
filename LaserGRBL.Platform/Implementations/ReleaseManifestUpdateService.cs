@@ -13,6 +13,7 @@ public sealed class ReleaseManifestUpdateService(
     public async Task<OperationResult<UpdateInfo?>> CheckAsync(CancellationToken cancellationToken = default)
     {
         if (!enabled) return OperationResult<UpdateInfo?>.Success(null);
+        if (manifestUri.Scheme != Uri.UriSchemeHttps) return OperationResult<UpdateInfo?>.Failure("Update manifest URL must use HTTPS.", manifestUri.ToString());
 
         var result = await manifests.GetManifestAsync(manifestUri, cancellationToken);
         if (!result.Succeeded || result.Value is null)
@@ -25,10 +26,14 @@ public sealed class ReleaseManifestUpdateService(
                 return OperationResult<UpdateInfo?>.Failure("Update manifest does not contain a valid version.");
             if (string.IsNullOrWhiteSpace(manifest.ReleaseUrl) || !Uri.TryCreate(manifest.ReleaseUrl, UriKind.Absolute, out var releaseUri))
                 return OperationResult<UpdateInfo?>.Failure("Update manifest does not contain a valid release URL.");
+            if (releaseUri.Scheme != Uri.UriSchemeHttps) return OperationResult<UpdateInfo?>.Failure("Update release URL must use HTTPS.");
+            if (version <= currentVersion) return OperationResult<UpdateInfo?>.Success(null);
+            if (!Version.TryParse(manifest.ArtifactVersion, out var artifactVersion) || artifactVersion != version)
+                return OperationResult<UpdateInfo?>.Failure("Update artifact version does not match manifest version.");
+            if (string.IsNullOrWhiteSpace(manifest.Sha256) || manifest.Sha256.Length != 64 || manifest.Sha256.Any(value => !Uri.IsHexDigit(value)))
+                return OperationResult<UpdateInfo?>.Failure("Update manifest does not contain a valid SHA256 artifact integrity value.");
 
-            return version > currentVersion
-                ? OperationResult<UpdateInfo?>.Success(new UpdateInfo(version, releaseUri, manifest.Notes))
-                : OperationResult<UpdateInfo?>.Success(null);
+            return OperationResult<UpdateInfo?>.Success(new UpdateInfo(version, releaseUri, manifest.Notes, artifactVersion, manifest.Sha256));
         }
         catch (JsonException exception)
         {
@@ -36,5 +41,5 @@ public sealed class ReleaseManifestUpdateService(
         }
     }
 
-    private sealed record ReleaseManifest(string Version, string ReleaseUrl, string? Notes);
+    private sealed record ReleaseManifest(string Version, string ReleaseUrl, string? Notes, string? ArtifactVersion, string? Sha256);
 }
