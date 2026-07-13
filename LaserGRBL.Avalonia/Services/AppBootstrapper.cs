@@ -108,29 +108,3 @@ public sealed class UnavailableFileDialogService : IFileDialogService
     public Task<OperationResult<string>> SaveAsync(FileDialogRequest request, CancellationToken cancellationToken = default) =>
         Task.FromResult(OperationResult<string>.Failure("Native file dialogs are not wired in this shell build.", request.Title));
 }
-
-public sealed class AppLogSink(IAppPaths paths)
-{
-    public string LogFilePath => Path.Combine(paths.LogDirectory, "lasergrbl.log");
-
-    public void Info(string message) => Write("INFO", message);
-
-    public void Warning(string message) => Write("WARN", message);
-
-    private void Write(string level, string message)
-    {
-        try
-        {
-            Directory.CreateDirectory(paths.LogDirectory);
-            File.AppendAllText(LogFilePath, $"{DateTimeOffset.UtcNow:O} {level} {message}{Environment.NewLine}");
-        }
-        catch (IOException)
-        {
-            // Startup must remain non-fatal even when logging cannot be initialized.
-        }
-        catch (UnauthorizedAccessException)
-        {
-            // Startup must remain non-fatal even when logging cannot be initialized.
-        }
-    }
-}
