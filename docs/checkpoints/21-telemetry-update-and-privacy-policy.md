@@ -49,7 +49,8 @@ The plain sandboxed VSTest path still cannot run because local socket creation i
 ## Git
 
 - Branch: `feature/21-privacy-updates`
-- Implementation commit: pending until commit is created.
+- Implementation commit: `4f9eaab` (`Task 21: Telemetry update and privacy policy`)
+- Metadata commit: pending until this checkpoint metadata is committed.
 - Push: pending until branch is pushed.
 
 ## Remaining Risks
