@@ -92,6 +92,22 @@ public sealed class LinuxPackagingDeviceAccessTests
         Assert.Contains("release-blocking", readme);
     }
 
+    [Fact]
+    public void Release_hardware_validation_runner_is_fail_closed_and_prefers_stable_serial_paths()
+    {
+        var script = File.ReadAllText(Path.Combine(RepositoryRoot(), "scripts", "validate-release-hardware.sh"));
+
+        Assert.Contains("sha256sum -c", script);
+        Assert.Contains("install-desktop-integration.sh", script);
+        Assert.Contains("/dev/serial/by-id", script);
+        Assert.Contains("ttyUSB", script);
+        Assert.Contains("ttyACM", script);
+        Assert.Contains("blocked", script);
+        Assert.Contains("exit 3", script);
+        Assert.Contains("Manual GRBL Workflow Evidence Required", script);
+        Assert.DoesNotContain("sudo", script);
+    }
+
     private static string RepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
