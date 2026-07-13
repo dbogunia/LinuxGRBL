@@ -44,8 +44,8 @@ Implemented the Linux-port user data compatibility layer with explicit format de
 
 - Branch: `feature/18-user-data-compatibility`
 - Implementation commit: `7d44c70` (`Task 18: User data compatibility`)
-- Metadata commit: pending until this checkpoint metadata is committed.
-- Push: pending until commits are pushed.
+- Metadata commit: `7cb486c` (`Record Task 18 checkpoint metadata`)
+- Push: branch pushed to `origin/feature/18-user-data-compatibility`; PR #26 opened at https://github.com/dbogunia/LinuxGRBL/pull/26.
 
 ## Remaining Risks
 
