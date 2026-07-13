@@ -39,7 +39,7 @@ Task 22 uses `docs/linux-port-plan-coverage.md`, the task checkpoints, and local
 | Localization/resx | Implemented catalog/fallback policy | Task 17 tests | Not every legacy string translated; non-text resx intentionally not ported. | Low | Add strings as screens become real UI. |
 | User data compatibility | Implemented with explicit supported/unsupported behavior | Task 18 tests/docs | Arbitrary BinaryFormatter graphs unsupported. | Medium | Optional offline converters for high-demand formats. |
 | Secret storage / Telegram | Policy-gated, secure-store required | Tasks 18/21 tests | Current bootstrap uses unavailable secret store, so Telegram remains disabled. | Medium | Add Linux keyring/libsecret implementation. |
-| Packaging, desktop/MIME, device/sandbox access | Implemented metadata/tarball/desktop/MIME guidance | Task 15C tests | Clean-install with serial hardware not performed. | Release blocker | Fresh user/session package install smoke with serial device. |
+| Packaging, desktop/MIME, device/sandbox access | Implemented metadata/tarball/desktop/MIME guidance and fail-closed validation runner | Task 15C tests; Task 24 `scripts/validate-release-hardware.sh` | Clean-install with serial hardware not performed because no controller is attached. | Release blocker | Run the validation runner with a readable/writable serial controller and record manual GRBL workflow evidence. |
 | Update/privacy/artifact integrity | Implemented policy-gated off by default | Task 21 tests | No updater execution by design. | Low | Keep release manifest generation aligned with SHA policy. |
 | Emulator console | Implemented bounded read-only activity console | Tasks 08/14 tests | GUI inspection still useful. | Low | Include in manual UI pass. |
 | Timing / sleep inhibition | Implemented monotonic clock boundary and best-effort inhibitor behavior | Tasks 02/03/12 tests | Real desktop inhibitor unavailable in current bootstrap. | Medium | Add Linux portal/systemd inhibitor implementation. |
@@ -53,7 +53,7 @@ Task 22 uses `docs/linux-port-plan-coverage.md`, the task checkpoints, and local
 | Severity | Blocked item | Impacted workflow | Recommended next task |
 | --- | --- | --- | --- |
 | Release blocker | Real USB GRBL hardware validation missing | Connect, manual command, run/hold/resume/reset/abort/disconnect | Hardware validation pass with stable `/dev/serial/by-id` device. |
-| Release blocker | Clean-install package/device validation missing | Package install, desktop/MIME launch, serial permissions, bundled resources | Fresh Linux user/session tarball install smoke with serial hardware. |
+| Release blocker | Clean-install package/device validation missing | Package install, desktop/MIME launch, serial permissions, bundled resources | Run `scripts/validate-release-hardware.sh` with serial hardware attached. |
 | High | Full 3D interaction and legacy behavior comparison incomplete | Rotate/tilt/zoom/reset/progress/machine cursor, required SharpGL replacement parity | Manual graphical parity pass using the Task 23 validation host/script. |
 | High | Firmware/WiFi/audio behavior not manually validated on real environment | Firmware flashing, WiFi configuration, sound cues | Safe hardware/manual validation only. |
 | High | Legacy binary `.lps` direct import incomplete | Existing Windows LaserGRBL project users | Offline converter or clear migration tool. |

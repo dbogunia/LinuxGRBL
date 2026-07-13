@@ -26,7 +26,7 @@ The Linux MVP is buildable, testable, packageable, and the Avalonia shell starts
 Tasks 17-22 now provide localization, user-data compatibility, diagnostics, safety/legal gating, privacy policy, and final parity documentation. Task 23 closes the real GPU/display nonblank OpenGL validation on the `t3500` X11/NVIDIA host. The MVP is still not release-ready because required hardware/package validations are still missing:
 
 - real USB GRBL device validation
-- real clean-install package smoke with serial hardware
+- real clean-install package smoke with serial hardware; Task 24 adds a fail-closed runner, but no hardware is attached yet
 - final 3D/SharpGL behavior comparison beyond the nonblank Linux render proof
 
 ## Validation Table
@@ -53,6 +53,7 @@ Tasks 17-22 now provide localization, user-data compatibility, diagnostics, safe
 | Final parity matrix | Pass with blockers | `docs/feature-parity-and-sharpgl-decision.md` | Matrix complete; release blockers remain explicit |
 | OpenGL host info | Pass | `glxinfo -B` | NVIDIA GTX 1050 Ti, direct rendering, OpenGL 4.6 |
 | 3D preview nonblank render | Pass | `scripts/validate-opengl-preview.sh linux-x64`; `artifacts/opengl-validation/lasergrbl-3d-preview.png`; `opengl-diagnostics.log` | Avalonia OpenGL context initialized and rendered frames; screenshot crop passed pixel thresholds |
+| Clean-install validation runner | Pass with blocked hardware | `scripts/validate-release-hardware.sh linux-x64 0.1.0` | Verifies package checksum, isolated desktop/MIME install, startup/file-open smoke; exits blocked when serial hardware is absent |
 | Emulator/fake workflow | Pass | Main workflow, transport, lifecycle, command streaming tests | Automated fake/emulator coverage only |
 | Serial device discovery | Partial | Tests + host probe | No `/dev/serial/by-id`, `/dev/ttyUSB*`, or `/dev/ttyACM*` devices present on host |
 | Sound fallback | Pass | Task 15 tests + host tools | `pw-play`, `paplay`, and `aplay` present |
@@ -75,6 +76,7 @@ timeout 8s artifacts/publish/linux-x64/LaserGRBL.Avalonia
 timeout 8s artifacts/publish/linux-x64/LaserGRBL.Avalonia /tmp/linuxgrbl-task16-smoke.gcode
 glxinfo -B
 scripts/validate-opengl-preview.sh linux-x64
+scripts/validate-release-hardware.sh linux-x64 0.1.0
 ```
 
 Clean-ish package installer smoke:

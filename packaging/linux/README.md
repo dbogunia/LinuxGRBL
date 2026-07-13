@@ -71,7 +71,15 @@ Missing optional tools must be surfaced as actionable feature errors. The packag
 
 Task 15C validates tarball construction, metadata, desktop/MIME assets, file-open argument routing, and permission/tool remediation text in automated tests.
 
-A real clean-install smoke test on a fresh Linux user/session with serial hardware is not performed yet and remains release-blocking.
+A repeatable clean-install and hardware validation runner is available:
+
+```bash
+scripts/validate-release-hardware.sh linux-x64 0.1.0
+```
+
+The runner validates the tarball checksum, extracts the package into an isolated validation directory, installs desktop/MIME integration under an isolated `XDG_DATA_HOME`, starts the packaged app with sample G-code, and detects a serial controller from an explicit device path, `/dev/serial/by-id/*`, `/dev/ttyUSB*`, or `/dev/ttyACM*`.
+
+A real clean-install smoke test with serial hardware is not complete until that runner records a physical readable/writable controller and the manual GRBL workflow evidence. Missing hardware is reported as blocked, not passed, and remains release-blocking.
 
 ## Update Behavior
 
