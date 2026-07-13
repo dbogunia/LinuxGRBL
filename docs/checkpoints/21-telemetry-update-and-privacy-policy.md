@@ -50,8 +50,8 @@ The plain sandboxed VSTest path still cannot run because local socket creation i
 
 - Branch: `feature/21-privacy-updates`
 - Implementation commit: `4f9eaab` (`Task 21: Telemetry update and privacy policy`)
-- Metadata commit: pending until this checkpoint metadata is committed.
-- Push: pending until branch is pushed.
+- Metadata commit: `9940b30` (`Record Task 21 checkpoint metadata`)
+- Push: branch pushed to `origin/feature/21-privacy-updates`; PR #29 opened at https://github.com/dbogunia/LinuxGRBL/pull/29.
 
 ## Remaining Risks
 
