@@ -14,6 +14,7 @@ public sealed class LinuxPackagingDeviceAccessTests
         var desktop = File.ReadAllText(Path.Combine(root, "packaging", "linux", "desktop", "linuxgrbl.desktop"));
         var mime = File.ReadAllText(Path.Combine(root, "packaging", "linux", "mime", "application-x-lasergrbl-project.xml"));
         var icon = File.ReadAllText(Path.Combine(root, "packaging", "linux", "icons", "linuxgrbl.svg"));
+        var appStream = File.ReadAllText(Path.Combine(root, "packaging", "linux", "metainfo", "io.github.dbogunia.LinuxGRBL.appdata.xml"));
 
         Assert.Contains("Exec=LaserGRBL.Avalonia %f", desktop);
         Assert.Contains("application/x-lasergrbl-project", desktop);
@@ -21,6 +22,9 @@ public sealed class LinuxPackagingDeviceAccessTests
         Assert.Contains("*.lps", mime);
         Assert.Contains("*.gcode", mime);
         Assert.Contains("<svg", icon);
+        Assert.Contains("<component type=\"desktop-application\">", appStream);
+        Assert.Contains("<id>io.github.dbogunia.LinuxGRBL</id>", appStream);
+        Assert.Contains("<launchable type=\"desktop-id\">io.github.dbogunia.LinuxGRBL.desktop</launchable>", appStream);
     }
 
     [Fact]
@@ -35,6 +39,26 @@ public sealed class LinuxPackagingDeviceAccessTests
     }
 
     [Fact]
+    public void Appimage_script_builds_appdir_with_desktop_mime_icon_and_checksums()
+    {
+        var script = File.ReadAllText(Path.Combine(RepositoryRoot(), "scripts", "build-linux-appimage.sh"));
+
+        Assert.Contains("appimagetool", script);
+        Assert.Contains("LinuxGRBL-$version-x86_64.AppImage", script);
+        Assert.Contains("AppRun", script);
+        Assert.Contains("Exec=AppRun %f", script);
+        Assert.Contains("app_id=\"io.github.dbogunia.LinuxGRBL\"", script);
+        Assert.Contains("$app_id.desktop", script);
+        Assert.Contains("desktop-file-validate", script);
+        Assert.Contains("application-x-lasergrbl-project.xml", script);
+        Assert.Contains("io.github.dbogunia.LinuxGRBL.appdata.xml", script);
+        Assert.Contains("linuxgrbl.svg", script);
+        Assert.Contains("sha256sum", script);
+        Assert.Contains("APPIMAGE_EXTRACT_AND_RUN=1", script);
+        Assert.DoesNotContain("sudo", script);
+    }
+
+    [Fact]
     public void Package_manifest_declares_user_scoped_desktop_integration()
     {
         using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(RepositoryRoot(), "packaging", "linux", "package-manifest.json")));
@@ -45,6 +69,13 @@ public sealed class LinuxPackagingDeviceAccessTests
         Assert.Equal("mime/application-x-lasergrbl-project.xml", desktop.GetProperty("mimeInfo").GetString());
         Assert.Equal("install-desktop-integration.sh", desktop.GetProperty("installer").GetString());
         Assert.Equal("user", desktop.GetProperty("installScope").GetString());
+        Assert.Equal("metainfo/io.github.dbogunia.LinuxGRBL.appdata.xml", desktop.GetProperty("appStream").GetString());
+
+        var appImage = document.RootElement.GetProperty("additionalFormats").EnumerateArray().Single(format => format.GetProperty("format").GetString() == "AppImage");
+        Assert.Equal("LinuxGRBL-0.1.0-x86_64.AppImage", appImage.GetProperty("artifact").GetString());
+        Assert.Equal("metainfo/io.github.dbogunia.LinuxGRBL.appdata.xml", appImage.GetProperty("appStream").GetString());
+        Assert.False(appImage.GetProperty("sandboxed").GetBoolean());
+        Assert.Equal("host-serial-permissions", appImage.GetProperty("deviceAccess").GetString());
     }
 
     [Fact]
@@ -85,7 +116,9 @@ public sealed class LinuxPackagingDeviceAccessTests
         var readme = File.ReadAllText(Path.Combine(RepositoryRoot(), "packaging", "linux", "README.md"));
 
         Assert.Contains("self-contained `tar.gz`", readme);
-        Assert.Contains("No `.deb`, RPM, AppImage, or Flatpak", readme);
+        Assert.Contains("AppImage as a second portable artifact", readme);
+        Assert.Contains("No `.deb`, RPM, or Flatpak", readme);
+        Assert.Contains("AppImage is not a sandbox", readme);
         Assert.Contains("sudo usermod -aG dialout", readme);
         Assert.Contains("./install-desktop-integration.sh", readme);
         Assert.Contains("A real clean-install smoke test", readme);
@@ -98,6 +131,11 @@ public sealed class LinuxPackagingDeviceAccessTests
         var script = File.ReadAllText(Path.Combine(RepositoryRoot(), "scripts", "validate-release-hardware.sh"));
 
         Assert.Contains("sha256sum -c", script);
+        Assert.Contains("LINUXGRBL_PACKAGE_FORMAT", script);
+        Assert.Contains("appimage", script);
+        Assert.Contains("LinuxGRBL-$version-x86_64.AppImage", script);
+        Assert.Contains("--appimage-extract", script);
+        Assert.Contains("APPIMAGE_EXTRACT_AND_RUN=1", script);
         Assert.Contains("install-desktop-integration.sh", script);
         Assert.Contains("/dev/serial/by-id", script);
         Assert.Contains("ttyUSB", script);

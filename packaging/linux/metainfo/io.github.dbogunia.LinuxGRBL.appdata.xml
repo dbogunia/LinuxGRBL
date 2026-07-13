@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.dbogunia.LinuxGRBL</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>LaserGRBL</name>
+  <summary>Linux laser engraving controller</summary>
+  <description>
+    <p>LaserGRBL for Linux provides a native Avalonia shell for loading G-code, previewing jobs, and controlling GRBL-family laser controllers.</p>
+  </description>
+  <developer id="io.github.dbogunia">
+    <name>LinuxGRBL contributors</name>
+  </developer>
+  <url type="homepage">https://github.com/dbogunia/LinuxGRBL</url>
+  <content_rating type="oars-1.1" />
+  <launchable type="desktop-id">io.github.dbogunia.LinuxGRBL.desktop</launchable>
+  <provides>
+    <binary>LaserGRBL.Avalonia</binary>
+  </provides>
+</component>

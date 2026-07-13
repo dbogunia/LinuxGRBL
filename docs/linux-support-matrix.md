@@ -10,7 +10,7 @@ This matrix defines the current support contract for the SDK-style Linux port. I
 | Runner OS | Ubuntu 24.04 GitHub-hosted runner | `.github/workflows/linux-port.yml` |
 | Target framework | `net8.0` | SDK-style Core, Platform, Avalonia, Tests projects |
 | Build architecture | `linux-x64` | Task 15 tarball manifest and CI runner |
-| Package format | self-contained `tar.gz` metadata and script validation | `packaging/linux/package-manifest.json`, `scripts/build-linux-tarball.sh` |
+| Package format | self-contained `tar.gz` plus AppImage metadata/script validation | `packaging/linux/package-manifest.json`, `scripts/build-linux-tarball.sh`, `scripts/build-linux-appimage.sh` |
 | Test scope | restore, build, xUnit tests, package metadata guard | `.github/workflows/linux-port.yml` |
 
 ## Tested Locally But Not Yet Claimed As Release Support
@@ -29,7 +29,8 @@ This matrix defines the current support contract for the SDK-style Linux port. I
 | Wayland | not manually validated | Task 16/22 graphical validation. |
 | X11 | not manually validated | Task 16/22 graphical validation. |
 | OpenGL/Mesa minimum | not manually validated | Task 13B/16/22 must record real GPU/display evidence. |
-| Flatpak, AppImage, `.deb`, RPM | not supported by Task 15 | Task 15C can add a package-specific access model. |
+| Flatpak, `.deb`, RPM | not supported yet | A future task can add a package-specific access model. |
+| AppImage | supported as a portable, non-sandboxed artifact | Uses host serial permissions; does not close hardware validation by itself. |
 | Serial/USB permissions from installed package | not validated | Task 15C. |
 | Physical laser hardware | not required in CI | Task 16 gated validation. |
 
