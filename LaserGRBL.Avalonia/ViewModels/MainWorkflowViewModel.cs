@@ -7,6 +7,7 @@ using LaserGRBL.Avalonia.Services;
 using LaserGRBL.Core.Abstractions;
 using LaserGRBL.Core.GCode;
 using LaserGRBL.Core.Protocol;
+using LaserGRBL.Core.Safety;
 using LaserGRBL.Platform.Contracts;
 
 namespace LaserGRBL.Avalonia.ViewModels;
@@ -20,6 +21,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private readonly IPreview3DRenderer preview3DRenderer;
     private readonly IOpenGlPreviewContextFactory openGlContextFactory;
     private readonly IMachineResourceLockProvider? resourceLocks;
+    private readonly ISafetyGate safetyGate;
     private readonly PreviewRenderStyle previewStyle;
     private readonly GCodeJob job = new();
     private ISerialConnection? connection;
@@ -44,7 +46,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     private PreviewCamera3D preview3DCamera = new();
     private OpenGlPreviewContextStatus preview3DStatus;
 
-    public MainWorkflowViewModel(ISerialPortService serialPorts, IExecutionInhibitor executionInhibitor, IMessageService messages, IJobPreviewRenderer? previewRenderer = null, PreviewRenderStyle? previewStyle = null, IPreview3DRenderer? preview3DRenderer = null, IOpenGlPreviewContextFactory? openGlContextFactory = null, IMachineResourceLockProvider? resourceLocks = null)
+    public MainWorkflowViewModel(ISerialPortService serialPorts, IExecutionInhibitor executionInhibitor, IMessageService messages, IJobPreviewRenderer? previewRenderer = null, PreviewRenderStyle? previewStyle = null, IPreview3DRenderer? preview3DRenderer = null, IOpenGlPreviewContextFactory? openGlContextFactory = null, IMachineResourceLockProvider? resourceLocks = null, ISafetyGate? safetyGate = null)
     {
         this.serialPorts = serialPorts;
         this.executionInhibitor = executionInhibitor;
@@ -53,6 +55,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
         this.preview3DRenderer = preview3DRenderer ?? new Preview3DSceneBuilder();
         this.openGlContextFactory = openGlContextFactory ?? new AvaloniaOpenGlPreviewContextFactory();
         this.resourceLocks = resourceLocks;
+        this.safetyGate = safetyGate ?? PermissiveSafetyGate.Instance;
         this.previewStyle = previewStyle ?? PreviewRenderStyle.FromScheme(ColorSchemeCatalog.Default.Get("Default"));
         previewScene = PreviewSceneModel.Empty(this.previewStyle);
         preview3DScene = this.preview3DRenderer.BuildScene(previewScene);
@@ -265,6 +268,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     public async Task RunJobAsync(CancellationToken cancellationToken = default)
     {
         if (connection is null || !HasLoadedFile) return;
+        if (!await EnsureSafetyAsync(RiskyOperation.StartJob, cancellationToken)) return;
         await RunUiOperationAsync(async () =>
         {
             var inhibitor = await executionInhibitor.AcquireAsync("LaserGRBL job is active.", cancellationToken);
@@ -302,6 +306,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
         if (connection is null) return;
+        if (!await EnsureSafetyAsync(RiskyOperation.Reset, cancellationToken)) return;
         await connection.WriteRealtimeAsync(0x18, cancellationToken);
         await ReleaseInhibitorAsync();
         IsJobActive = false;
@@ -313,6 +318,7 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         if (connection is null) return;
+        if (!await EnsureSafetyAsync(RiskyOperation.Abort, cancellationToken)) return;
         await session.AbortProgramAsync(connection, cancellationToken);
         await ReleaseInhibitorAsync();
         IsJobActive = false;
@@ -391,6 +397,14 @@ public sealed class MainWorkflowViewModel : INotifyPropertyChanged, IAsyncDispos
         };
         AddLog(detail);
         await messages.ShowAsync(new MessageRequest("LaserGRBL", detail, severity), cancellationToken);
+    }
+
+    private async Task<bool> EnsureSafetyAsync(RiskyOperation operation, CancellationToken cancellationToken)
+    {
+        var result = safetyGate.EnsureAllowed(operation);
+        if (result.Succeeded) return true;
+        await ReportErrorAsync("Safety acknowledgement required.", result.Error, cancellationToken, MessageSeverity.Warning);
+        return false;
     }
 
     private async Task ReleaseInhibitorAsync()
