@@ -59,8 +59,8 @@ Completed the final parity assessment for the Linux port. The result is document
 
 - Branch: `feature/22-feature-parity`
 - Implementation commit: `2f886bf` (`Task 22: Feature parity and SharpGL decision`)
-- Metadata commit: pending until this checkpoint metadata is committed.
-- Push: pending until branch is pushed.
+- Metadata commit: `6afb5df` (`Record Task 22 checkpoint metadata`)
+- Push: branch pushed to `origin/feature/22-feature-parity`; PR #30 opened at https://github.com/dbogunia/LinuxGRBL/pull/30.
 
 ## Remaining Risks
 
