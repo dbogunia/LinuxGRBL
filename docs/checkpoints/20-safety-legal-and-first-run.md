@@ -46,7 +46,8 @@ No legacy warning was intentionally weakened or removed. The Linux port still la
 ## Git
 
 - Branch: `feature/20-safety-first-run`
-- Implementation commit: pending until commit is created.
+- Implementation commit: `8b28095` (`Task 20: Safety legal and first run`)
+- Metadata commit: pending until this checkpoint metadata is committed.
 - Push: pending until branch is pushed.
 
 ## Remaining Risks
