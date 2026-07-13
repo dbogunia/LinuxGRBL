@@ -46,7 +46,8 @@ The plain sandboxed VSTest path still cannot run because local socket creation i
 ## Git
 
 - Branch: `feature/19-diagnostics`
-- Implementation commit: pending until commit is created.
+- Implementation commit: `a0d4da1` (`Task 19: Logging diagnostics and support bundle`)
+- Metadata commit: pending until this checkpoint metadata is committed.
 - Push: pending until branch is pushed.
 
 ## Remaining Risks
