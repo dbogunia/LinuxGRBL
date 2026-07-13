@@ -38,10 +38,53 @@ jobs:
           test -f packaging/linux/package-manifest.json
           test -f packaging/linux/THIRD-PARTY-NOTICES.md
           test -x scripts/build-linux-tarball.sh
+          test -x scripts/build-linux-appimage.sh
           grep -q '"format": "tar.gz"' packaging/linux/package-manifest.json
+          grep -q '"format": "AppImage"' packaging/linux/package-manifest.json
           grep -q '"integrityAlgorithm": "SHA256"' packaging/linux/package-manifest.json
           grep -q 'dotnet publish' scripts/build-linux-tarball.sh
           grep -q 'sha256sum' scripts/build-linux-tarball.sh
+          grep -q 'appimagetool' scripts/build-linux-appimage.sh
+          grep -q 'sha256sum' scripts/build-linux-appimage.sh
+
+      - name: Install AppImage packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y desktop-file-utils xvfb libfuse2t64
+          mkdir -p "$RUNNER_TEMP/appimage-tools"
+          wget -O "$RUNNER_TEMP/appimage-tools/appimagetool-x86_64.AppImage" \
+            https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x "$RUNNER_TEMP/appimage-tools/appimagetool-x86_64.AppImage"
+
+      - name: Build AppImage
+        env:
+          APPIMAGETOOL: ${{ runner.temp }}/appimage-tools/appimagetool-x86_64.AppImage
+        run: scripts/build-linux-appimage.sh linux-x64 0.1.0
+
+      - name: Validate AppImage artifact
+        run: |
+          test -x artifacts/LinuxGRBL-0.1.0-x86_64.AppImage
+          sha256sum -c artifacts/LinuxGRBL-0.1.0-x86_64.AppImage.sha256
+          rm -rf squashfs-root
+          artifacts/LinuxGRBL-0.1.0-x86_64.AppImage --appimage-extract >/tmp/linuxgrbl-appimage-extract.log
+          test -x squashfs-root/AppRun
+          test -x squashfs-root/usr/bin/LaserGRBL.Avalonia
+          test -f squashfs-root/io.github.dbogunia.LinuxGRBL.desktop
+          test -f squashfs-root/linuxgrbl.svg
+          test -f squashfs-root/usr/share/mime/packages/application-x-lasergrbl-project.xml
+          test -f squashfs-root/usr/share/metainfo/io.github.dbogunia.LinuxGRBL.appdata.xml
+          test -f squashfs-root/usr/bin/Sound/connect.wav
+          test -f squashfs-root/usr/share/doc/linuxgrbl/package-manifest.json
+          printf "G21\nG90\nG0 X0 Y0\nG1 X5 Y5 F500\n" > /tmp/linuxgrbl-appimage-smoke.gcode
+          APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a timeout 8s artifacts/LinuxGRBL-0.1.0-x86_64.AppImage /tmp/linuxgrbl-appimage-smoke.gcode || test "$?" = "124"
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linuxgrbl-appimage
+          path: |
+            artifacts/LinuxGRBL-0.1.0-x86_64.AppImage
+            artifacts/LinuxGRBL-0.1.0-x86_64.AppImage.sha256
 
       - name: Guard Linux CI target
         run: |

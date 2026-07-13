@@ -17,7 +17,7 @@ Baseline master commit after PR #23: `d50df493a602fb2bb8253c45fa5b1052c601dca3`
 | .NET SDK | `8.0.422` |
 | .NET runtime | `8.0.28` |
 | Session | `DISPLAY=:0`, `XDG_SESSION_TYPE=x11` |
-| Package artifact | `artifacts/linuxgrbl-avalonia-0.1.0-linux-x64.tar.gz` |
+| Package artifact | `artifacts/linuxgrbl-avalonia-0.1.0-linux-x64.tar.gz`; `artifacts/LinuxGRBL-0.1.0-x86_64.AppImage` |
 
 ## Summary
 
@@ -38,12 +38,13 @@ Tasks 17-22 now provide localization, user-data compatibility, diagnostics, safe
 | Avalonia startup | Pass | `timeout 8s artifacts/publish/linux-x64/LaserGRBL.Avalonia` | Process stayed alive until timeout; log records shell bootstrap |
 | Startup file-open argument | Pass | `timeout 8s artifacts/publish/linux-x64/LaserGRBL.Avalonia /tmp/linuxgrbl-task16-smoke.gcode` | Process stayed alive until timeout |
 | Package build | Pass | `scripts/build-linux-tarball.sh linux-x64 0.1.0` | Tarball and `.sha256` produced |
+| AppImage build | Pass in CI/local where `appimagetool` is available | `scripts/build-linux-appimage.sh linux-x64 0.1.0` | AppImage and `.sha256`; AppDir extract/smoke in CI |
 | Package checksum | Pass | `sha256sum -c artifacts/linuxgrbl-avalonia-0.1.0-linux-x64.tar.gz.sha256` | OK |
 | Package contents | Pass | `tar -tzf ... | rg ...` | binary, sound cues, desktop, MIME, icon, installer, manifest present |
 | Package desktop installer | Pass after fix | Extracted tarball under `/tmp`, ran `XDG_DATA_HOME=/tmp/linuxgrbl-task16-smoke/xdg ./install-desktop-integration.sh` | Found and fixed wrong package-root calculation in Task 16 |
 | CI/support matrix | Pass | Tests + Task 15A GitHub Actions evidence | CI target is `LaserGRBL.Linux.sln` |
 | Image/GDI compatibility | Pass | Task 15B fixtures in 192-test suite | SkiaSharp backend; no production `System.Drawing.Common` dependency |
-| Device access/package policy | Pass | Task 15C tests in 192-test suite | tar.gz only; host permissions; `/dev/serial/by-id`; `dialout` guidance |
+| Device access/package policy | Pass | Task 15C/25 tests | tarball and AppImage use host permissions; `/dev/serial/by-id`; `dialout` guidance |
 | Safe shutdown/resource ownership | Pass | Task 15D tests in 192-test suite | bounded shutdown, fail-closed recovery, file lock ownership, PTY smoke |
 | Localization/resx migration | Pass | Task 17 tests/checkpoint | Catalog fallback and non-text resource policy documented |
 | User data compatibility | Pass | Task 18 tests/checkpoint | Supported JSON imports; arbitrary legacy binary graphs preserved/manual |

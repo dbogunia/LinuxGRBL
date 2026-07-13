@@ -45,6 +45,8 @@ public sealed class LinuxCiSupportMatrixTests
 
         Assert.Contains("Validate package metadata", workflow);
         Assert.Contains("sha256sum", workflow);
+        Assert.Contains("Build AppImage", workflow);
+        Assert.Contains("Upload AppImage artifact", workflow);
         Assert.DoesNotContain("softprops/action-gh-release", workflow);
     }
 

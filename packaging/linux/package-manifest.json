@@ -2,12 +2,23 @@
   "packageId": "linuxgrbl-avalonia",
   "version": "0.1.0",
   "format": "tar.gz",
+  "additionalFormats": [
+    {
+      "format": "AppImage",
+      "artifact": "LinuxGRBL-0.1.0-x86_64.AppImage",
+      "runtimeIdentifiers": [ "linux-x64" ],
+      "appStream": "metainfo/io.github.dbogunia.LinuxGRBL.appdata.xml",
+      "deviceAccess": "host-serial-permissions",
+      "sandboxed": false
+    }
+  ],
   "runtimeIdentifiers": [ "linux-x64" ],
   "integrityAlgorithm": "SHA256",
   "desktopIntegration": {
     "desktopEntry": "desktop/linuxgrbl.desktop",
     "icon": "icons/linuxgrbl.svg",
     "mimeInfo": "mime/application-x-lasergrbl-project.xml",
+    "appStream": "metainfo/io.github.dbogunia.LinuxGRBL.appdata.xml",
     "installer": "install-desktop-integration.sh",
     "installScope": "user"
   },
