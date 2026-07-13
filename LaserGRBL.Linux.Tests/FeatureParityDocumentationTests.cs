@@ -49,8 +49,9 @@ public sealed class FeatureParityDocumentationTests
         var document = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "feature-parity-and-sharpgl-decision.md"));
 
         Assert.Contains("required SharpGL/3D behavior is replaced by an Avalonia/OpenGL path", document);
-        Assert.Contains("release-blocking incomplete", document);
-        Assert.Contains("Real GPU/display nonblank OpenGL validation missing", document);
+        Assert.Contains("real nonblank Linux GPU render", document);
+        Assert.Contains("Real GPU/display nonblank proof complete", document);
+        Assert.DoesNotContain("Real GPU/display nonblank OpenGL validation missing", document);
         Assert.Contains("Real USB GRBL hardware validation missing", document);
         Assert.Contains("Clean-install package/device validation missing", document);
         Assert.Contains("global named-event dependency", document);
@@ -65,7 +66,8 @@ public sealed class FeatureParityDocumentationTests
         Assert.Contains("Final parity matrix", readiness);
         Assert.Contains("Tasks 17-22 now provide", readiness);
         Assert.DoesNotContain("final parity, diagnostics, safety/legal, privacy, localization, and user-data tasks from Tasks 17-22", readiness);
-        Assert.Contains("real OpenGL/GPU validation, real hardware serial validation, and clean-install package validation", readiness);
+        Assert.Contains("Task 23 closes the real GPU/display nonblank OpenGL validation", readiness);
+        Assert.Contains("real hardware serial validation and clean-install package validation", readiness);
     }
 
     private static string RepositoryRoot()

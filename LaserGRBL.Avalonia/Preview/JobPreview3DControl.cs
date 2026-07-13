@@ -55,7 +55,9 @@ public sealed class JobPreview3DControl : OpenGlControlBase
         }
 
         context.DrawRectangle(scene.Style.Background, null, bounds);
-        DrawDiagnostic(context, scene, bounds);
+        if (ContextStatus.Available) return;
+
+        DrawDiagnostic(context, scene);
 
         if (scene.IsEmpty || scene.Bounds is null)
         {
@@ -78,11 +80,13 @@ public sealed class JobPreview3DControl : OpenGlControlBase
         {
             renderer = OpenGlImmediatePreviewRenderer.FromAvalonia(gl);
             ContextStatus = OpenGlPreviewContextStatus.Success($"Avalonia OpenGL context initialized ({GlVersion}).");
+            OpenGlPreviewDiagnostics.Record(ContextStatus.Diagnostic);
         }
         catch (Exception exception) when (exception is OpenGlPreviewRendererException or EntryPointNotFoundException or AccessViolationException)
         {
             renderer = null;
             ContextStatus = OpenGlPreviewContextStatus.Failure(exception.Message);
+            OpenGlPreviewDiagnostics.Record(ContextStatus.Diagnostic);
         }
         base.OnOpenGlInit(gl);
     }
@@ -108,16 +112,17 @@ public sealed class JobPreview3DControl : OpenGlControlBase
         {
             renderer.Render(Scene, Camera, Math.Max(1, (int)Bounds.Width), Math.Max(1, (int)Bounds.Height));
             ContextStatus = OpenGlPreviewContextStatus.Success($"Avalonia OpenGL rendered frame ({GlVersion}).");
+            OpenGlPreviewDiagnostics.Record(ContextStatus.Diagnostic);
         }
         catch (Exception exception) when (exception is OpenGlPreviewRendererException or EntryPointNotFoundException or AccessViolationException)
         {
             ContextStatus = OpenGlPreviewContextStatus.Failure(exception.Message);
+            OpenGlPreviewDiagnostics.Record(ContextStatus.Diagnostic);
         }
     }
 
-    private void DrawDiagnostic(DrawingContext context, Preview3DSceneModel scene, Rect bounds)
+    private void DrawDiagnostic(DrawingContext context, Preview3DSceneModel scene)
     {
-        if (ContextStatus.Available) return;
         var text = $"3D/OpenGL fallback: {ContextStatus.Diagnostic}";
         DrawText(context, text, new Point(12, 10), scene.Style.Error, 12);
     }
@@ -163,5 +168,27 @@ public sealed class JobPreview3DControl : OpenGlControlBase
     {
         var text = new FormattedText(value, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, size, brush);
         context.DrawText(text, origin);
+    }
+}
+
+public static class OpenGlPreviewDiagnostics
+{
+    private const string DiagnosticsPathVariable = "LASERGRBL_OPENGL_DIAGNOSTICS_PATH";
+
+    public static void Record(string message)
+    {
+        var path = Environment.GetEnvironmentVariable(DiagnosticsPathVariable);
+        if (string.IsNullOrWhiteSpace(path)) return;
+
+        try
+        {
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(directory)) Directory.CreateDirectory(directory);
+            File.AppendAllText(path, $"{DateTimeOffset.UtcNow:O} {message}{Environment.NewLine}");
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // Diagnostics must not affect preview rendering.
+        }
     }
 }

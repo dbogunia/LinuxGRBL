@@ -1,8 +1,8 @@
 # Linux Port MVP Readiness
 
-Date: 2026-07-12
+Date: 2026-07-13
 
-Branch: `feature/16-mvp-validation`
+Branch: `feature/23-opengl-render-validation`
 
 Baseline master commit after PR #23: `d50df493a602fb2bb8253c45fa5b1052c601dca3`
 
@@ -21,14 +21,13 @@ Baseline master commit after PR #23: `d50df493a602fb2bb8253c45fa5b1052c601dca3`
 
 ## Summary
 
-The Linux MVP is buildable, testable, packageable, and the Avalonia shell starts on the validation host. Automated validation covers the core workflow model, serial abstractions, emulator/fake transports, G-code file loading, 2D/3D scene models, OpenGL draw backend through fake GL, packaging metadata, image conversion, device-access policy, safe shutdown, and resource ownership.
+The Linux MVP is buildable, testable, packageable, and the Avalonia shell starts on the validation host. Automated validation covers the core workflow model, serial abstractions, emulator/fake transports, G-code file loading, 2D/3D scene models, OpenGL draw backend, packaging metadata, image conversion, device-access policy, safe shutdown, and resource ownership.
 
-Tasks 17-22 now provide localization, user-data compatibility, diagnostics, safety/legal gating, privacy policy, and final parity documentation. The MVP is still not release-ready because required manual/hardware validations are still missing:
+Tasks 17-22 now provide localization, user-data compatibility, diagnostics, safety/legal gating, privacy policy, and final parity documentation. Task 23 closes the real GPU/display nonblank OpenGL validation on the `t3500` X11/NVIDIA host. The MVP is still not release-ready because required hardware/package validations are still missing:
 
-- real GPU/display nonblank 3D OpenGL validation from Task 13B/16/22
 - real USB GRBL device validation
 - real clean-install package smoke with serial hardware
-- final 3D/SharpGL behavior comparison on a real Linux display/GPU
+- final 3D/SharpGL behavior comparison beyond the nonblank Linux render proof
 
 ## Validation Table
 
@@ -52,14 +51,15 @@ Tasks 17-22 now provide localization, user-data compatibility, diagnostics, safe
 | Safety/legal first-run | Pass | Task 20 tests/checkpoint | Risky operations fail closed until acknowledged |
 | Privacy/update policy | Pass | Task 21 tests/checkpoint | Telemetry and optional network calls off by default, update integrity policy |
 | Final parity matrix | Pass with blockers | `docs/feature-parity-and-sharpgl-decision.md` | Matrix complete; release blockers remain explicit |
+| OpenGL host info | Pass | `glxinfo -B` | NVIDIA GTX 1050 Ti, direct rendering, OpenGL 4.6 |
+| 3D preview nonblank render | Pass | `scripts/validate-opengl-preview.sh linux-x64`; `artifacts/opengl-validation/lasergrbl-3d-preview.png`; `opengl-diagnostics.log` | Avalonia OpenGL context initialized and rendered frames; screenshot crop passed pixel thresholds |
 | Emulator/fake workflow | Pass | Main workflow, transport, lifecycle, command streaming tests | Automated fake/emulator coverage only |
 | Serial device discovery | Partial | Tests + host probe | No `/dev/serial/by-id`, `/dev/ttyUSB*`, or `/dev/ttyACM*` devices present on host |
 | Sound fallback | Pass | Task 15 tests + host tools | `pw-play`, `paplay`, and `aplay` present |
 | WiFi service | Partial | Task 10 tests + `nmcli` present | `nmcli` exists; no manual WiFi scan/config validation recorded |
 | Firmware flash dry-run/tool policy | Partial | Task 14/15 tests | `avrdude` not installed on host; real flashing not authorized/performed |
 | Autotrace/tool policy | Partial | Task 09/15 tests | `autotrace` not installed on host |
-| OpenGL host info | Blocker | `glxinfo -B` failed: `unable to open display :0` | No real nonblank GPU/render validation |
-| 3D preview interactions | Blocker | Automated model/fake-GL tests only | Manual rotate/pan/zoom/reset/progress/cursor validation not recorded |
+| 3D preview interactions | Partial | Automated model tests plus Task 23 nonblank render evidence | Detailed manual rotate/pan/zoom/reset/progress/cursor parity still not recorded |
 | Real GRBL hardware | Blocker | Host probe found no serial device | Real controller workflow not validated |
 | Clean install with hardware | Blocker | `/tmp` package smoke only | Fresh user/session with serial hardware not validated |
 
@@ -74,6 +74,7 @@ tar -tzf artifacts/linuxgrbl-avalonia-0.1.0-linux-x64.tar.gz | rg 'LaserGRBL.Ava
 timeout 8s artifacts/publish/linux-x64/LaserGRBL.Avalonia
 timeout 8s artifacts/publish/linux-x64/LaserGRBL.Avalonia /tmp/linuxgrbl-task16-smoke.gcode
 glxinfo -B
+scripts/validate-opengl-preview.sh linux-x64
 ```
 
 Clean-ish package installer smoke:
@@ -104,13 +105,13 @@ Fix:
 
 | Severity | Blocker | Impacted Workflow | Recommended Next Task |
 | --- | --- | --- | --- |
-| Release-blocking | Real GPU/display nonblank OpenGL validation missing | 3D preview, rotate/pan/zoom/reset/progress/cursor | Dedicated graphical validation pass before release |
 | Release-blocking | Real USB GRBL hardware not available on validation host | connect/run/hold/resume/reset/manual command against physical controller | Task 16 hardware pass or release branch validation |
 | Release-blocking | Clean-install package smoke with real serial hardware not performed | install docs, desktop/MIME, serial permission path | Release branch validation after Task 16 |
+| High | Full 3D interaction and legacy behavior comparison still manual | rotate/pan/zoom/reset/progress/cursor and legacy SharpGL comparison | Manual graphical parity pass |
 | High | Firmware/WiFi/audio behavior not manually validated on real environment | firmware flashing, WiFi configuration, sound cues | Safe hardware/manual validation only |
 | High | Legacy binary `.lps` direct import incomplete | existing Windows LaserGRBL project users | Offline converter or documented manual re-save/export |
 | Medium | `SincroStart` Run Multi deferred | users coordinating multiple app instances/machines | Linux cross-process coordinator design |
 
 ## MVP Verdict
 
-The Linux port MVP has completed Tasks 17-22 documentation and automated validation. It is not release-ready. The largest remaining release blockers are real OpenGL/GPU validation, real hardware serial validation, and clean-install package validation with serial hardware.
+The Linux port MVP has completed Tasks 17-22 documentation and automated validation, plus Task 23 real nonblank OpenGL render validation. It is not release-ready. The largest remaining release blockers are real hardware serial validation and clean-install package validation with serial hardware.
