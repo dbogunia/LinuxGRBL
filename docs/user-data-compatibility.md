@@ -23,12 +23,20 @@ Task 18 defines Linux-port behavior for legacy LaserGRBL user data. The port pre
 {
   "SchemaVersion": 1,
   "Settings": {
-    "SchemaVersion": 2,
+    "SchemaVersion": 4,
     "Firmware": "Grbl",
     "StreamingMode": "Buffered",
     "ColorScheme": "Default",
     "Language": "en",
-    "RecentFiles": []
+    "RecentFiles": [],
+    "Privacy": {
+      "TelemetryEnabled": false,
+      "UpdateChecksEnabled": false,
+      "MaterialUpdatesEnabled": false,
+      "UsageStatisticsEnabled": false,
+      "LaserStatisticsEnabled": false,
+      "TelegramNotificationsEnabled": false
+    }
   },
   "CustomButtons": [{ "Id": 1, "Label": "Unlock", "Command": "$X" }],
   "Hotkeys": [{ "Action": "Run", "Gesture": "Ctrl+R", "IsConflict": false }],

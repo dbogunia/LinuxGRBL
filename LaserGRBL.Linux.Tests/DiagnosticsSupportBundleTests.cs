@@ -94,7 +94,7 @@ public sealed class DiagnosticsSupportBundleTests : IDisposable
 
         var result = await service.CreateAsync(new SupportBundleRequest(
             bundlePath,
-            PortSettings.Default with { RecentFiles = [new RecentFile("/home/user/private.nc", DateTimeOffset.UnixEpoch)] },
+            PortSettings.Default with { RecentFiles = [new RecentFile("/home/user/private.nc", DateTimeOffset.UnixEpoch)], Privacy = LaserGRBL.Core.Privacy.PrivacySettings.Default with { UpdateChecksEnabled = true } },
             ["Secret store unavailable", "token=abc"],
             [new SerialPortDescriptor("usb-grbl", "USB GRBL", "/dev/ttyUSB0")]));
 
@@ -107,11 +107,13 @@ public sealed class DiagnosticsSupportBundleTests : IDisposable
         var connection = ReadEntry(archive, "logs/connection.log");
         var application = ReadEntry(archive, "logs/application.log");
         var communication = ReadEntry(archive, "logs/communication.log");
+        var settings = ReadEntry(archive, "settings-summary.json");
 
         Assert.Contains("token= [REDACTED]", startup);
         Assert.Contains("password= [REDACTED]", connection);
         Assert.DoesNotContain(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), application);
         Assert.Contains("TX G0 X0", communication);
+        Assert.Contains("\"UpdateChecksEnabled\": true", settings);
     }
 
     public void Dispose()

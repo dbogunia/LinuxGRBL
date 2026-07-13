@@ -55,22 +55,25 @@ public sealed class SoundUpdatePackagingTests : IDisposable
     [Fact]
     public async Task Update_service_reports_available_release()
     {
-        var service = new ReleaseManifestUpdateService(new ManifestClient("""{"version":"0.2.0","releaseUrl":"https://example.com/release","notes":"new"}"""), new Uri("https://example.com/manifest.json"), new Version(0, 1, 0));
+        var service = new ReleaseManifestUpdateService(new ManifestClient(Manifest("0.2.0")), new Uri("https://example.com/manifest.json"), new Version(0, 1, 0));
 
         var result = await service.CheckAsync();
 
         Assert.True(result.Succeeded);
         Assert.Equal(new Version(0, 2, 0), result.Value?.Version);
         Assert.Equal("https://example.com/release", result.Value?.ReleaseUri.ToString());
+        Assert.Equal(new string('a', 64), result.Value?.Sha256);
     }
 
     [Fact]
     public async Task Update_service_returns_null_when_disabled_or_current()
     {
-        var disabled = new ReleaseManifestUpdateService(new ManifestClient("""{"version":"9.9.9","releaseUrl":"https://example.com/release"}"""), new Uri("https://example.com/manifest.json"), new Version(0, 1, 0), enabled: false);
-        var current = new ReleaseManifestUpdateService(new ManifestClient("""{"version":"0.1.0","releaseUrl":"https://example.com/release"}"""), new Uri("https://example.com/manifest.json"), new Version(0, 1, 0));
+        var disabledClient = new ManifestClient(Manifest("9.9.9"));
+        var disabled = new ReleaseManifestUpdateService(disabledClient, new Uri("https://example.com/manifest.json"), new Version(0, 1, 0), enabled: false);
+        var current = new ReleaseManifestUpdateService(new ManifestClient(Manifest("0.1.0")), new Uri("https://example.com/manifest.json"), new Version(0, 1, 0));
 
         Assert.Null((await disabled.CheckAsync()).Value);
+        Assert.Equal(0, disabledClient.RequestCount);
         Assert.Null((await current.CheckAsync()).Value);
     }
 
@@ -135,9 +138,12 @@ public sealed class SoundUpdatePackagingTests : IDisposable
 
     private sealed class ManifestClient(string? manifest, OperationResult<string>? result = null) : IUpdateManifestClient
     {
+        public int RequestCount { get; private set; }
         public Task<OperationResult<string>> GetManifestAsync(Uri manifestUri, CancellationToken cancellationToken = default) =>
-            Task.FromResult(result ?? OperationResult<string>.Success(manifest ?? ""));
+            Task.FromResult((RequestCount++, result ?? OperationResult<string>.Success(manifest ?? "")).Item2);
     }
+
+    private static string Manifest(string version) => $$"""{"version":"{{version}}","artifactVersion":"{{version}}","releaseUrl":"https://example.com/release","sha256":"{{new string('a', 64)}}","notes":"new"}""";
 
     private static string RepositoryRoot()
     {
