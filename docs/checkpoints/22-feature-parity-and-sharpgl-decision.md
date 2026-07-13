@@ -58,7 +58,8 @@ Completed the final parity assessment for the Linux port. The result is document
 ## Git
 
 - Branch: `feature/22-feature-parity`
-- Implementation commit: pending until commit is created.
+- Implementation commit: `2f886bf` (`Task 22: Feature parity and SharpGL decision`)
+- Metadata commit: pending until this checkpoint metadata is committed.
 - Push: pending until branch is pushed.
 
 ## Remaining Risks
