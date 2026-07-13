@@ -23,12 +23,12 @@ Baseline master commit after PR #23: `d50df493a602fb2bb8253c45fa5b1052c601dca3`
 
 The Linux MVP is buildable, testable, packageable, and the Avalonia shell starts on the validation host. Automated validation covers the core workflow model, serial abstractions, emulator/fake transports, G-code file loading, 2D/3D scene models, OpenGL draw backend through fake GL, packaging metadata, image conversion, device-access policy, safe shutdown, and resource ownership.
 
-The MVP is not release-ready yet because required manual/hardware validations are still missing:
+Tasks 17-22 now provide localization, user-data compatibility, diagnostics, safety/legal gating, privacy policy, and final parity documentation. The MVP is still not release-ready because required manual/hardware validations are still missing:
 
 - real GPU/display nonblank 3D OpenGL validation from Task 13B/16/22
 - real USB GRBL device validation
 - real clean-install package smoke with serial hardware
-- final parity, diagnostics, safety/legal, privacy, localization, and user-data tasks from Tasks 17-22
+- final 3D/SharpGL behavior comparison on a real Linux display/GPU
 
 ## Validation Table
 
@@ -46,6 +46,12 @@ The MVP is not release-ready yet because required manual/hardware validations ar
 | Image/GDI compatibility | Pass | Task 15B fixtures in 192-test suite | SkiaSharp backend; no production `System.Drawing.Common` dependency |
 | Device access/package policy | Pass | Task 15C tests in 192-test suite | tar.gz only; host permissions; `/dev/serial/by-id`; `dialout` guidance |
 | Safe shutdown/resource ownership | Pass | Task 15D tests in 192-test suite | bounded shutdown, fail-closed recovery, file lock ownership, PTY smoke |
+| Localization/resx migration | Pass | Task 17 tests/checkpoint | Catalog fallback and non-text resource policy documented |
+| User data compatibility | Pass | Task 18 tests/checkpoint | Supported JSON imports; arbitrary legacy binary graphs preserved/manual |
+| Diagnostics/support bundle | Pass | Task 19 tests/checkpoint | Redacted local support bundle, log channels, rotation |
+| Safety/legal first-run | Pass | Task 20 tests/checkpoint | Risky operations fail closed until acknowledged |
+| Privacy/update policy | Pass | Task 21 tests/checkpoint | Telemetry and optional network calls off by default, update integrity policy |
+| Final parity matrix | Pass with blockers | `docs/feature-parity-and-sharpgl-decision.md` | Matrix complete; release blockers remain explicit |
 | Emulator/fake workflow | Pass | Main workflow, transport, lifecycle, command streaming tests | Automated fake/emulator coverage only |
 | Serial device discovery | Partial | Tests + host probe | No `/dev/serial/by-id`, `/dev/ttyUSB*`, or `/dev/ttyACM*` devices present on host |
 | Sound fallback | Pass | Task 15 tests + host tools | `pw-play`, `paplay`, and `aplay` present |
@@ -98,16 +104,13 @@ Fix:
 
 | Severity | Blocker | Impacted Workflow | Recommended Next Task |
 | --- | --- | --- | --- |
-| Release-blocking | Real GPU/display nonblank OpenGL validation missing | 3D preview, rotate/pan/zoom/reset/progress/cursor | Task 22, or a dedicated validation pass before release |
+| Release-blocking | Real GPU/display nonblank OpenGL validation missing | 3D preview, rotate/pan/zoom/reset/progress/cursor | Dedicated graphical validation pass before release |
 | Release-blocking | Real USB GRBL hardware not available on validation host | connect/run/hold/resume/reset/manual command against physical controller | Task 16 hardware pass or release branch validation |
 | Release-blocking | Clean-install package smoke with real serial hardware not performed | install docs, desktop/MIME, serial permission path | Release branch validation after Task 16 |
-| Release-blocking | Safety/legal first-run language not complete | user understanding of software safety limits | Task 20 |
-| High | Diagnostics/support bundle not complete | supportability after field failures | Task 19 |
-| High | Privacy/update policy not complete | update checks and user trust | Task 21 |
-| Medium | Localization/resx migration not complete | non-English UI/resources | Task 17 |
-| Medium | User data compatibility not complete | migration of existing settings/projects | Task 18 |
-| Medium | Final parity review not complete | gap closure against legacy LaserGRBL | Task 22 |
+| High | Firmware/WiFi/audio behavior not manually validated on real environment | firmware flashing, WiFi configuration, sound cues | Safe hardware/manual validation only |
+| High | Legacy binary `.lps` direct import incomplete | existing Windows LaserGRBL project users | Offline converter or documented manual re-save/export |
+| Medium | `SincroStart` Run Multi deferred | users coordinating multiple app instances/machines | Linux cross-process coordinator design |
 
 ## MVP Verdict
 
-The Linux port MVP is ready to continue into Tasks 17-22. It is not release-ready. The largest remaining release blockers are real OpenGL/GPU validation, real hardware serial validation, clean-install package validation, and final safety/legal/privacy/parity work.
+The Linux port MVP has completed Tasks 17-22 documentation and automated validation. It is not release-ready. The largest remaining release blockers are real OpenGL/GPU validation, real hardware serial validation, and clean-install package validation with serial hardware.
