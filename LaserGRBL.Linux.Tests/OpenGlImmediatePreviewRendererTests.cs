@@ -18,8 +18,8 @@ public sealed class OpenGlImmediatePreviewRendererTests
         renderer.Render(scene, new PreviewCamera3D(), 640, 480);
 
         Assert.True(api.ClearCalls > 0);
-        Assert.True(api.BeginCalls > 0);
-        Assert.True(api.VertexCalls >= scene.Lines.Count * 2);
+        Assert.True(api.DrawArraysCalls > 0);
+        Assert.True(api.UploadedVertexCount >= scene.Lines.Count * 2);
     }
 
     [Fact]
@@ -56,16 +56,33 @@ public sealed class OpenGlImmediatePreviewRendererTests
     private sealed class StubOpenGlApi : IOpenGlApi
     {
         public int BeginCalls { get; private set; }
-        public int VertexCalls { get; private set; }
+        public int DrawArraysCalls { get; private set; }
+        public int UploadedVertexCount { get; private set; }
         public int ClearCalls { get; private set; }
         public void Viewport(int x, int y, int width, int height) { }
         public void ClearColor(float red, float green, float blue, float alpha) { }
         public void Clear(uint mask) => ClearCalls++;
         public void Enable(uint cap) { }
-        public void LineWidth(float width) { }
-        public void Begin(uint mode) => BeginCalls++;
-        public void End() { }
-        public void Color4f(float red, float green, float blue, float alpha) { }
-        public void Vertex3d(double x, double y, double z) => VertexCalls++;
+        public uint CreateShader(uint type) => type;
+        public void ShaderSource(uint shader, string source) { }
+        public void CompileShader(uint shader) { }
+        public void GetShaderiv(uint shader, uint pname, out int value) => value = 1;
+        public string GetShaderInfoLog(uint shader) => "";
+        public uint CreateProgram() => 10;
+        public void AttachShader(uint program, uint shader) { }
+        public void LinkProgram(uint program) { }
+        public void GetProgramiv(uint program, uint pname, out int value) => value = 1;
+        public string GetProgramInfoLog(uint program) => "";
+        public void DeleteShader(uint shader) { }
+        public void UseProgram(uint program) { }
+        public void GenVertexArrays(int count, uint[] arrays) => arrays[0] = 30;
+        public void BindVertexArray(uint array) { }
+        public void GenBuffers(int count, uint[] buffers) => buffers[0] = 20;
+        public void BindBuffer(uint target, uint buffer) { }
+        public void BufferData(uint target, int size, float[] data, uint usage) => UploadedVertexCount = data.Length / 7;
+        public void EnableVertexAttribArray(uint index) { }
+        public void VertexAttribPointer(uint index, int size, uint type, bool normalized, int stride, int offset) { }
+        public void DrawArrays(uint mode, int first, int count) => DrawArraysCalls++;
+        public uint GetError() => 0;
     }
 }
