@@ -47,8 +47,8 @@ The plain sandboxed VSTest path still cannot run because local socket creation i
 
 - Branch: `feature/19-diagnostics`
 - Implementation commit: `a0d4da1` (`Task 19: Logging diagnostics and support bundle`)
-- Metadata commit: pending until this checkpoint metadata is committed.
-- Push: pending until branch is pushed.
+- Metadata commit: `444efcf` (`Record Task 19 checkpoint metadata`)
+- Push: branch pushed to `origin/feature/19-diagnostics`; PR #27 opened at https://github.com/dbogunia/LinuxGRBL/pull/27.
 
 ## Remaining Risks
 
