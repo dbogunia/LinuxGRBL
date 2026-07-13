@@ -47,8 +47,8 @@ No legacy warning was intentionally weakened or removed. The Linux port still la
 
 - Branch: `feature/20-safety-first-run`
 - Implementation commit: `8b28095` (`Task 20: Safety legal and first run`)
-- Metadata commit: pending until this checkpoint metadata is committed.
-- Push: pending until branch is pushed.
+- Metadata commit: `9f86e33` (`Record Task 20 checkpoint metadata`)
+- Push: branch pushed to `origin/feature/20-safety-first-run`; PR #28 opened at https://github.com/dbogunia/LinuxGRBL/pull/28.
 
 ## Remaining Risks
 
