@@ -43,8 +43,9 @@ Implemented the Linux-port user data compatibility layer with explicit format de
 ## Git
 
 - Branch: `feature/18-user-data-compatibility`
-- Commit: `8227d81` (`Task 18: User data compatibility`)
-- Push: pending until commit is pushed.
+- Implementation commit: `7d44c70` (`Task 18: User data compatibility`)
+- Metadata commit: pending until this checkpoint metadata is committed.
+- Push: pending until commits are pushed.
 
 ## Remaining Risks
 
